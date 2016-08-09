@@ -7,93 +7,216 @@ using System.ServiceModel.Web;
 using System.Text;
 
 // CheckersService
-[ServiceContract(CallbackContract = typeof(ICheckersServiceCallback), SessionMode = SessionMode.Required)]
-public interface ICheckersService
+[ServiceContract]
+public interface IRestCheckersService
 {
     /******  REST calls ******/
     // Players REST calls
     [OperationContract]
-    [WebInvoke(Method = "PUT", UriTemplate = "/players", ResponseFormat = WebMessageFormat.Json)]
-    void AddPlayers(List<Player> players);
+    [WebInvoke(Method = "PUT", UriTemplate = "/players/add", ResponseFormat = WebMessageFormat.Json)]
+    bool AddPlayer(Player player);
 
     [OperationContract]
-    [WebInvoke(Method = "PUT", UriTemplate = "/players", ResponseFormat = WebMessageFormat.Json)]
-    void AddPlayer(Player player);
-
-    [OperationContract]
-    [WebInvoke(Method = "DELETE", UriTemplate = "/players?id={playerId}", ResponseFormat = WebMessageFormat.Json)]
-    void RemovePlayer(int playerId);
+    [WebInvoke(Method = "DELETE", UriTemplate = "/players/delete?playerId={playerId}", ResponseFormat = WebMessageFormat.Json)]
+    bool RemovePlayer(string playerId);
 
     [OperationContract]
     [WebInvoke(Method = "POST", UriTemplate = "/players/update", ResponseFormat = WebMessageFormat.Json)]
-    void UpdatePlayer(Player player);
-
+    bool UpdatePlayer(Player player);
 
     [OperationContract]
-    [WebGet(UriTemplate = "/players", ResponseFormat = WebMessageFormat.Json)]
+    [WebGet(UriTemplate = "/players/get?playerId={playerId}")]
+    Player GetPlayerById(string playerId);
+
+    [OperationContract]
+    [WebGet(UriTemplate = "/players/getAll", ResponseFormat = WebMessageFormat.Json)]
     List<Player> GetPlayers();
 
     [OperationContract]
-    [WebGet(UriTemplate = "/players?gameId={gameId}", ResponseFormat = WebMessageFormat.Json)]
-    List<Player> GetPlayerByGame(int gameId);
+    [WebGet(UriTemplate = "/players/byGame?gameId={gameId}", ResponseFormat = WebMessageFormat.Json)]
+    List<Player> GetPlayersByGame(string gameId);
 
     [OperationContract]
-    [WebInvoke(Method = "DELETE", UriTemplate = "/games?id={gameId}", ResponseFormat = WebMessageFormat.Json)]
-    void RemoveGame(int gameId);
+    [WebInvoke(Method = "DELETE", UriTemplate = "/games/delete?gameId={gameId}", ResponseFormat = WebMessageFormat.Json)]
+    bool RemoveGame(string gameId);
 
     [OperationContract]
     [WebInvoke(Method = "POST", UriTemplate = "/games/update", ResponseFormat = WebMessageFormat.Json)]
-    void UpdateGame(Game game);
+    bool UpdateGame(Game game);
 
     // Games REST Calls
     [OperationContract]
     [WebInvoke(Method = "PUT", UriTemplate = "/games/add", ResponseFormat = WebMessageFormat.Json)]
-    void AddGame(Game game);
+    bool AddGame(Game game);
 
     [OperationContract]
-    [WebGet(UriTemplate = "/games", ResponseFormat = WebMessageFormat.Json)]
+    [WebGet(UriTemplate = "/games/getAll", ResponseFormat = WebMessageFormat.Json)]
     List<Game> GetGames();
 
     [OperationContract]
-    [WebGet(UriTemplate = "/games?playerId={playerId}", ResponseFormat = WebMessageFormat.Json)]
-    List<Game> GetGamesByPlayer(int playerId);
+    [WebGet(UriTemplate = "/games/get?gameId={gameId}")]
+    Game GetGameById(string gameId);
+
+    [OperationContract]
+    [WebGet(UriTemplate = "/games/byPlayer?playerId={playerId}", ResponseFormat = WebMessageFormat.Json)]
+    List<Game> GetGamesByPlayer(string playerId);
 
 
     [OperationContract]
     [WebGet(UriTemplate = "/games/count?playerId={playerId}", ResponseFormat = WebMessageFormat.Json)]
-    int GetTotalGamesCountForPlayer(int playerId);
+    int GetTotalGamesCountForPlayer(string playerId);
+
+    [OperationContract]
+    [WebInvoke(Method = "PUT", UriTemplate = "/families/add", ResponseFormat = WebMessageFormat.Json)]
+    bool AddFamily(Family family);
+
+    [OperationContract]
+    [WebInvoke(Method = "DELETE", UriTemplate = "/families/delete?familyId={familyId}", ResponseFormat = WebMessageFormat.Json)]
+    bool DeleteFamily(string familyId);
+
+    [OperationContract]
+    [WebGet(UriTemplate = "/families/get?familyId={familyId}", ResponseFormat = WebMessageFormat.Json)]
+    Family GetFamily(string familyId);
+
+    [OperationContract]
+    [WebGet(UriTemplate = "/families/byPlayer?playerId={familyId}", ResponseFormat = WebMessageFormat.Json)]
+    List<Player> GetPlayersByFamily(string familyId);
+
+    [OperationContract]
+    [WebGet(UriTemplate = "/moves/byGame?gameId={gameId}")]
+    List<Move> GetMovesByGame(string gameId);
 
 }
 
-public interface ICheckersServiceCallback
+[ServiceContract]
+public interface ISOAPCheckersService
+{
+    [OperationContract]
+    List<Move> RecoverGameMovesByPlayer(Game game, Player player);
+
+
+}
+
+
+
+[ServiceContract(CallbackContract = typeof(IDuplexCheckersServiceCallback), SessionMode = SessionMode.Required)]
+public interface IDuplexCheckersService
+{
+    [OperationContract(IsOneWay = true)]
+    void MakeMove(Move move);
+
+    [OperationContract(IsOneWay = true)]
+    void Login(string name, string password);
+
+    [OperationContract(IsOneWay = true)]
+    void StartGame(string gameId);
+
+}
+
+public interface IDuplexCheckersServiceCallback
 {
     // Duplex client calls
+    [OperationContract(IsOneWay = true)]
+    void MakeMoveCallback(List<Move> availableMoves, Status status);
 
+    [OperationContract(IsOneWay = true)]
+    void LoginCallback(Player player, Status status);
+
+    [OperationContract(IsOneWay = true)]
+    void StartGameCallback(Game game, Status status);
+
+    [OperationContract(IsOneWay = true)]
+    void PlayerTurnCallback();
 }
 
 // Use a data contract as illustrated in the sample below to add composite types to service operations.
 [DataContract]
+public enum Status {
+    [EnumMember]
+    MOVE_ACCEPTED,
+    [EnumMember]
+    GAME_LOSE,
+    [EnumMember]
+    GAME_WIN,
+    [EnumMember]
+    GAME_STARTED,
+    [EnumMember]
+    NO_SUCH_GAME,
+    [EnumMember]
+    WAITING_FOR_OTHER_PLAYER_TO_ARRIVE,
+    [EnumMember]
+    NOT_ENOUGH_PLAYERS_TO_START_GAME,
+    [EnumMember]
+    GAME_ALREADY_STARTED_BY_OTHER_PLAYERS,
+    [EnumMember]
+    NOT_LOGGED_IN,
+    [EnumMember]
+    NO_SUCH_USER,
+    [EnumMember]
+    WRONG_INPUT,
+    [EnumMember]
+    LOGIN_SUCCEDED
+}
+
+[DataContract]
 public class Player
 {
-    int id { get; set; }
-    string name { get; set; }
-    string familyId { get; set; }
 
+    [DataMember]
+    public int Id { get; set; }
+    [DataMember]
+    public string Name { get; set; }
+    [DataMember]
+    public string Password { set; get; }
+    [DataMember]
+    public Family Family { get; set; }
 }
 
 [DataContract]
 public class Game
 {
-    string id { get; set; }
-    DateTime createdDateTime { get; set; }
+    [DataMember]
+    public int Id { get; set; }
+    [DataMember]
+    public DateTime CreatedDateTime { get; set; }
+    [DataMember]
+    public Player Player1 { get; set; }
+    [DataMember]
+    public Player Player2 { get; set; }
     
+}
+
+[DataContract]
+public class Family
+{
+    [DataMember]
+    public int Id { get; set; }
+    [DataMember]
+    public string Name { get; set; }
 }
 
 [DataContract]
 public class Move
 {
-    int id { get; set; }
-    int gameId { get; set; }
-    int playerId { get; set; }
-    DateTime dateTime { get; set; }
+    [DataMember]
+    public int Id { get; set; }
+    [DataMember]
+    public int GameId { get; set; }
+    [DataMember]
+    public int PlayerId { get; set; }
+    [DataMember]
+    public DateTime DateTime { get; set; }
+    [DataMember]
+    public Point From { get; set; }
+    [DataMember]
+    public Point To { get; set; }
+}
+
+[DataContract]
+public class Point
+{
+    [DataMember]
+    public int X { get; set; }
+    [DataMember]
+    public int Y { get; set; }
 }
