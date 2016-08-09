@@ -89,7 +89,7 @@ public interface IRestCheckersService
 }
 
 [ServiceContract]
-public interface ISOAPCheckersService
+public interface ISoapCheckersService
 {
     [OperationContract]
     List<Move> RecoverGameMovesByPlayer(Game game, Player player);

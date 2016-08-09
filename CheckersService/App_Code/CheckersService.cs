@@ -7,7 +7,7 @@ using System.ServiceModel.Web;
 using System.Text;
 
 [ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple, InstanceContextMode = InstanceContextMode.Single)]
-public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISOAPCheckersService // Interfaces
+public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISoapCheckersService // Interfaces
 {
 
     private CheckersDBDataContext db = new CheckersDBDataContext();
