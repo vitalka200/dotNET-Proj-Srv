@@ -93,8 +93,6 @@ public interface ISoapCheckersService
 {
     [OperationContract]
     List<Move> RecoverGameMovesByPlayer(Game game, Player player);
-
-
 }
 
 
@@ -110,6 +108,9 @@ public interface IDuplexCheckersService
 
     [OperationContract(IsOneWay = true)]
     void StartGame(string gameId);
+
+    [OperationContract]
+    void SaveInitialPositions(List<Move> initialPositions, Status gameStatus);
 
 }
 

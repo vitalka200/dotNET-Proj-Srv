@@ -13,15 +13,19 @@ CREATE TABLE [dbo].[TblGame] (
 );
 go
 CREATE TABLE [dbo].[TblMove] (
-    [Id]     INT IDENTITY (1, 1) NOT NULL,
-	[SequenceNum] INT IDENTITY (1, 1) NOT NULL,
-	[CreatedDate] DATE NOT NULL,
-    [From_X] INT NOT NULL,
-    [From_Y] INT NOT NULL,
-    [To_X]   INT NOT NULL,
-    [To_Y]   INT NOT NULL,
-    PRIMARY KEY CLUSTERED ([Id] ASC)
+    [Id]          INT  IDENTITY (1, 1) NOT NULL,
+    [CreatedDate] DATE NOT NULL,
+	[idPlayer]    INT  NOT NULL,
+    [From_X]      INT  NOT NULL,
+    [From_Y]      INT  NOT NULL,
+    [To_X]        INT  NOT NULL,
+    [To_Y]        INT  NOT NULL,
+    PRIMARY KEY CLUSTERED ([Id] ASC),
+	CONSTRAINT [FK_MoPl_ToPl] FOREIGN KEY ([idPlayer]) REFERENCES [dbo].[TblPlayer] ([Id]),
+	CONSTRAINT [FK_GaMo_ToGa] FOREIGN KEY ([idGame]) REFERENCES [dbo].[TblGame] ([Id]) ON DELETE CASCADE,
 );
+
+
 
 GO
 CREATE TABLE [dbo].[TblPlayer] (

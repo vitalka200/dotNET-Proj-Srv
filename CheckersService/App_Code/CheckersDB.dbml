@@ -30,27 +30,21 @@
       <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
       <Column Name="CreatedDate" Type="System.DateTime" DbType="Date NOT NULL" CanBeNull="false" />
       <Association Name="TblGame_TblPlayerGame" Member="TblPlayerGames" ThisKey="Id" OtherKey="idGame" Type="TblPlayerGame" />
-      <Association Name="TblGame_TblGameMove" Member="TblGameMoves" ThisKey="Id" OtherKey="idGame" Type="TblGameMove" />
-    </Type>
-  </Table>
-  <Table Name="dbo.TblGameMove" Member="TblGameMoves">
-    <Type Name="TblGameMove">
-      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="idMove" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Column Name="idGame" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Association Name="TblGame_TblGameMove" Member="TblGame" ThisKey="idGame" OtherKey="Id" Type="TblGame" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
-      <Association Name="TblMove_TblGameMove" Member="TblMove" ThisKey="idMove" OtherKey="Id" Type="TblMove" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+      <Association Name="TblGame_TblMove" Member="TblMoves" ThisKey="Id" OtherKey="idGame" Type="TblMove" />
     </Type>
   </Table>
   <Table Name="dbo.TblMove" Member="TblMoves">
     <Type Name="TblMove">
       <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
       <Column Name="CreatedDate" Type="System.DateTime" DbType="Date NOT NULL" CanBeNull="false" />
+      <Column Name="idPlayer" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="idGame" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="From_X" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="From_Y" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="To_X" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="To_Y" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
-      <Association Name="TblMove_TblGameMove" Member="TblGameMoves" ThisKey="Id" OtherKey="idMove" Type="TblGameMove" />
+      <Association Name="TblGame_TblMove" Member="TblGame" ThisKey="idGame" OtherKey="Id" Type="TblGame" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+      <Association Name="TblPlayer_TblMove" Member="TblPlayer" ThisKey="idPlayer" OtherKey="Id" Type="TblPlayer" IsForeignKey="true" />
     </Type>
   </Table>
   <Table Name="dbo.TblPlayer" Member="TblPlayers">
@@ -60,6 +54,7 @@
       <Column Name="Password" Type="System.String" DbType="VarChar(20) NOT NULL" CanBeNull="false" />
       <Association Name="TblPlayer_TblPlayerGame" Member="TblPlayerGames" ThisKey="Id" OtherKey="idPlayer" Type="TblPlayerGame" />
       <Association Name="TblPlayer_TblFamilyPlayer" Member="TblFamilyPlayers" ThisKey="Id" OtherKey="idPlayer" Type="TblFamilyPlayer" />
+      <Association Name="TblPlayer_TblMove" Member="TblMoves" ThisKey="Id" OtherKey="idPlayer" Type="TblMove" />
     </Type>
   </Table>
 </Database>
