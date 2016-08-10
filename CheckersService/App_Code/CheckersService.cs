@@ -11,7 +11,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 {
     private const int MAX_COLLS = 4;
     private const int MAX_ROWS = 8;
-    private Point INITIAL_POINT = new Point { X = -1, Y = -1};
+    private Coordinate INITIAL_POINT = new Coordinate { X = -1, Y = -1};
 
     private CheckersDBDataContext db = new CheckersDBDataContext();
     private Dictionary<Player, IDuplexCheckersServiceCallback> lookupPlayer2Callback = new Dictionary<Player, IDuplexCheckersServiceCallback>();
@@ -334,8 +334,8 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             {
                 Id = m.Id,
                 DateTime = m.CreatedDate,
-                From = new Point { X = m.From_X, Y = m.From_Y },
-                To = new Point { X = m.To_X, Y = m.To_Y },
+                From = new Coordinate { X = m.From_X, Y = m.From_Y },
+                To = new Coordinate { X = m.To_X, Y = m.To_Y },
                 PlayerId = m.idPlayer,
                 GameId = m.idGame
             };
@@ -403,19 +403,19 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
     private bool MoveIsValid(Player player, Game game, Move move)
     {
-        Point from = move.From;
-        Point to = move.To;
+        Coordinate from = move.From;
+        Coordinate to = move.To;
         Player player2 = game.Player1 == player ? game.Player2 : game.Player1;
 
         if (to.X > MAX_COLLS || to.X < 0 || to.Y > MAX_ROWS || to.Y < 0) return false;
-        Point delta = new Point { X = to.X - from.X, Y = to.Y - from.Y };
+        Coordinate delta = new Coordinate { X = to.X - from.X, Y = to.Y - from.Y };
 
         if (delta.X < 0 || delta.Y < 0) return false; // Jump outside the game plate
         if (delta.X > 2 || delta.Y > 2) return false; // Too long jump
         if (delta.X > 1 && delta.Y > 1) // we trying to eat somebody
         {
             // Get moves of other player in middle point
-            Point point = new Point { };
+            Coordinate point = new Coordinate { };
             List<TblMove> moves = GetMovesByCoordinatesAndPlayer(point, player2);
             if (moves.Count > 0) // We actually eating some soldier
             {
@@ -429,7 +429,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         return false;
     }
 
-    private List<TblMove> GetMovesByCoordinatesAndPlayer(Point point, Player player)
+    private List<TblMove> GetMovesByCoordinatesAndPlayer(Coordinate point, Player player)
     {
         var moves =
             from m in db.TblMoves

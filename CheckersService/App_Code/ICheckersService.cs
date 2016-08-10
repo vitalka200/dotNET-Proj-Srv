@@ -208,16 +208,44 @@ public class Move
     [DataMember]
     public DateTime DateTime { get; set; }
     [DataMember]
-    public Point From { get; set; }
+    public Coordinate From { get; set; }
     [DataMember]
-    public Point To { get; set; }
+    public Coordinate To { get; set; }
 }
 
 [DataContract]
-public class Point
+public class Coordinate
 {
     [DataMember]
     public int X { get; set; }
     [DataMember]
     public int Y { get; set; }
+
+    public Coordinate() { }
+
+    public Coordinate(int X, int Y)
+    {
+        this.X = X; this.Y = Y;
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is Coordinate)
+        {
+            Coordinate other = (Coordinate)obj;
+            return (X == other.X && Y == other.Y);
+        }
+        return false;
+    }
+
+    public override int GetHashCode()
+    {
+        return X.GetHashCode() & Y.GetHashCode();
+    }
+
+    public override string ToString()
+    {
+        return string.Format("({0,3}, {1,3})", X, Y);
+    }
+
 }
