@@ -359,7 +359,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         {
             status = Status.NOT_LOGGED_IN;
         }
-        sessionCallback.MakeMoveCallback(availableMoves, status);
+        sessionCallback.MakeMoveCallback(status);
     }
 
     private Status StoreMove(Move move, Player player, out List<Move> availableMoves)
@@ -394,7 +394,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 if (game.Player1 == player) { player2 = game.Player2; }
                 else { player2 = game.Player1; }
                 
-                lookupPlayer2Callback[player2].MakeMoveCallback(availableMoves, Status.GAME_WIN);
+                lookupPlayer2Callback[player2].MakeMoveCallback(Status.GAME_WIN);
             }
         } catch (Exception e) { }
 
@@ -465,7 +465,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             lookupPlayer2Callback.Add(player, cb);
         }
 
-        cb.LoginCallback(player, status);
+        cb.LoginCallback(player, new List<Game>(), status);
     }
 
     private Status validatePlayer(string name, string password, out Player player)
@@ -503,11 +503,10 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         return thisPlayerMoves.ToList();
     }
 
-    public void StartGame(string gameId)
+    public void StartGame(Game game, bool computerRival)
     {
         IDuplexCheckersServiceCallback cb = OperationContext.Current.GetCallbackChannel<IDuplexCheckersServiceCallback>();
         Status status = Status.GAME_STARTED;
-        Game game = null;
         Player player = null;
 
         if (lookupCallback2Player.TryGetValue(cb, out player))
@@ -518,7 +517,6 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         {
             try
             {
-                game = GetGameById(gameId);
                 if (game != null) // Game exists
                 {
                     if ((game.Player1 == null || game.Player1 == player) && game.Player2 != null && game.Player2 != player) //Joining as Player1 or reconecting after a disctonnect
@@ -594,5 +592,10 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             if (game.Player1 == player) // Send client to start game if it's Player1 (White)
             { lookupPlayer2Callback[player].PlayerTurnCallback(); }
         }
+    }
+
+    public List<Game> GetGamesByPlayer(Player player)
+    {
+        throw new NotImplementedException();
     }
 }

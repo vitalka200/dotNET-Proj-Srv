@@ -93,6 +93,9 @@ public interface ISoapCheckersService
 {
     [OperationContract]
     List<Move> RecoverGameMovesByPlayer(Game game, Player player);
+
+    [OperationContract]
+    List<Game> GetGamesByPlayer(Player player);
 }
 
 
@@ -107,9 +110,9 @@ public interface IDuplexCheckersService
     void Login(string name, string password);
 
     [OperationContract(IsOneWay = true)]
-    void StartGame(string gameId);
+    void StartGame(Game game, bool computerRival);
 
-    [OperationContract]
+    [OperationContract(IsOneWay = true)]
     void SaveInitialPositions(List<Move> initialPositions, Status gameStatus);
 
 }
@@ -118,10 +121,10 @@ public interface IDuplexCheckersServiceCallback
 {
     // Duplex client calls
     [OperationContract(IsOneWay = true)]
-    void MakeMoveCallback(List<Move> availableMoves, Status status);
+    void MakeMoveCallback(Status status);
 
     [OperationContract(IsOneWay = true)]
-    void LoginCallback(Player player, Status status);
+    void LoginCallback(Player player, List<Game> playerGames, Status status);
 
     [OperationContract(IsOneWay = true)]
     void StartGameCallback(Game game, Status status);
@@ -220,13 +223,6 @@ public class Coordinate
     public int X { get; set; }
     [DataMember]
     public int Y { get; set; }
-
-    public Coordinate() { }
-
-    public Coordinate(int X, int Y)
-    {
-        this.X = X; this.Y = Y;
-    }
 
     public override bool Equals(object obj)
     {
