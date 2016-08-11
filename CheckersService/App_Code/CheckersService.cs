@@ -448,7 +448,9 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
     {
         IDuplexCheckersServiceCallback cb = OperationContext.Current.GetCallbackChannel<IDuplexCheckersServiceCallback>();
         Player player;
+        List<Game> gameList= new List<Game>();
         Status status = validatePlayer(name, password, out player);
+
         if (Status.LOGIN_SUCCEDED == status)
         {
             // Cleanup old callbacks
@@ -463,9 +465,10 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             }
             lookupCallback2Player.Add(cb, player);
             lookupPlayer2Callback.Add(player, cb);
+            gameList = GetGamesByPlayer(player);
         }
 
-        cb.LoginCallback(player, new List<Game>(), status);
+        cb.LoginCallback(player, gameList, status);
     }
 
     private Status validatePlayer(string name, string password, out Player player)
