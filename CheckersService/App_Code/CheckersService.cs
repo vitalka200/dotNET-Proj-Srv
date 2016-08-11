@@ -89,20 +89,22 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
     public List<Game> GetGamesByPlayerId(string playerId)
     {
         int id = Convert.ToInt32(playerId);
-        var games =
+        var gamesFromDB =
             from g in db.TblGames
             join pg in db.TblPlayerGames on g.Id equals pg.idGame
-            where pg.Id == id
+            where pg.idPlayer == id
             select new Game { Id = g.Id, CreatedDateTime = g.CreatedDate };
 
-        foreach (var game in games)
+        List<Game> games = gamesFromDB.ToList();
+
+        for (int i = 0; i < games.Count(); i++)
         {
-            List<Player> players = GetPlayersByGame(game.Id.ToString());
-            game.Player1 = players.ElementAtOrDefault(0);
-            game.Player2 = players.ElementAtOrDefault(1);
+            List<Player> players = GetPlayersByGame(games[i].Id.ToString());
+            games[i].Player1 = players.ElementAtOrDefault(0);
+            games[i].Player2 = players.ElementAtOrDefault(1);
         }
 
-        return games.ToList();
+        return games;
     }
 
     public List<Player> GetPlayersByGame(string gameId)
