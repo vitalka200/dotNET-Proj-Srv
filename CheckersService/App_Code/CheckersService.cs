@@ -86,7 +86,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         return games.ToList();
     }
 
-    public List<Game> GetGamesByPlayer(string playerId)
+    public List<Game> GetGamesByPlayerId(string playerId)
     {
         int id = Convert.ToInt32(playerId);
         var games =
@@ -596,6 +596,6 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
     public List<Game> GetGamesByPlayer(Player player)
     {
-        throw new NotImplementedException();
+        return GetGamesByPlayerId(player.Id.ToString());
     }
 }

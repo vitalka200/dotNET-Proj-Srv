@@ -59,7 +59,7 @@ public interface IRestCheckersService
 
     [OperationContract]
     [WebGet(UriTemplate = "/games/byPlayer?playerId={playerId}", ResponseFormat = WebMessageFormat.Json)]
-    List<Game> GetGamesByPlayer(string playerId);
+    List<Game> GetGamesByPlayerId(string playerId);
 
 
     [OperationContract]
