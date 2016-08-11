@@ -16,6 +16,7 @@ CREATE TABLE [dbo].[TblMove] (
     [Id]          INT  IDENTITY (1, 1) NOT NULL,
     [CreatedDate] DATE NOT NULL,
 	[idPlayer]    INT  NOT NULL,
+	[idGame]    INT  NOT NULL,
     [From_X]      INT  NOT NULL,
     [From_Y]      INT  NOT NULL,
     [To_X]        INT  NOT NULL,

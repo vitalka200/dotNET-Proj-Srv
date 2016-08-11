@@ -174,6 +174,16 @@ public class Player
     public string Password { set; get; }
     [DataMember]
     public Family Family { get; set; }
+
+    public override bool Equals(object obj)
+    {
+        return Id.Equals(obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
+    }
 }
 
 [DataContract]
@@ -187,7 +197,18 @@ public class Game
     public Player Player1 { get; set; }
     [DataMember]
     public Player Player2 { get; set; }
-    
+
+
+    public override bool Equals(object obj)
+    {
+        return Id.Equals(obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
+    }
+
 }
 
 [DataContract]
@@ -197,6 +218,17 @@ public class Family
     public int Id { get; set; }
     [DataMember]
     public string Name { get; set; }
+
+
+    public override bool Equals(object obj)
+    {
+        return Id.Equals(obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
+    }
 }
 
 [DataContract]
@@ -214,6 +246,16 @@ public class Move
     public Coordinate From { get; set; }
     [DataMember]
     public Coordinate To { get; set; }
+
+    public override bool Equals(object obj)
+    {
+        return Id.Equals(obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
+    }
 }
 
 [DataContract]

@@ -509,7 +509,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         Status status = Status.GAME_STARTED;
         Player player = null;
 
-        if (lookupCallback2Player.TryGetValue(cb, out player))
+        if (!lookupCallback2Player.TryGetValue(cb, out player))
         {
             status = Status.NOT_LOGGED_IN;
         }
