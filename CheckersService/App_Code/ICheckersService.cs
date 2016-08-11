@@ -130,7 +130,7 @@ public interface IDuplexCheckersServiceCallback
     void StartGameCallback(Game game, Status status);
 
     [OperationContract(IsOneWay = true)]
-    void PlayerTurnCallback();
+    void PlayerTurnCallback(Move lastRivalMove);
 }
 
 // Use a data contract as illustrated in the sample below to add composite types to service operations.
@@ -177,7 +177,12 @@ public class Player
 
     public override bool Equals(object obj)
     {
-        return Id.Equals(obj);
+        if (obj != null)
+        {
+            Player other = (Player)obj;
+            return Id.Equals(other.Id);
+        }
+        return false;
     }
 
     public override int GetHashCode()
@@ -201,7 +206,12 @@ public class Game
 
     public override bool Equals(object obj)
     {
-        return Id.Equals(obj);
+        if (obj != null)
+        {
+            Game other = (Game)obj;
+            return Id.Equals(other.Id);
+        }
+        return false;
     }
 
     public override int GetHashCode()
@@ -222,7 +232,12 @@ public class Family
 
     public override bool Equals(object obj)
     {
-        return Id.Equals(obj);
+        if (obj != null)
+        {
+            Family other = (Family)obj;
+            return Id.Equals(other.Id);
+        }
+        return false;
     }
 
     public override int GetHashCode()
@@ -249,7 +264,12 @@ public class Move
 
     public override bool Equals(object obj)
     {
-        return Id.Equals(obj);
+        if (obj != null)
+        {
+            Move other = (Move)obj;
+            return Id.Equals(other.Id);
+        }
+        return false;
     }
 
     public override int GetHashCode()
