@@ -5,6 +5,7 @@ using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
+using LocalCheckersService;
 
 // CheckersService
 [ServiceContract]
@@ -131,6 +132,9 @@ public interface IDuplexCheckersServiceCallback
 
     [OperationContract(IsOneWay = true)]
     void PlayerTurnCallback(Move lastRivalMove);
+
+    [OperationContract(IsOneWay = true)]
+    void GameEnd(Move lastRivalMove, Status status);
 }
 
 // Use a data contract as illustrated in the sample below to add composite types to service operations.
@@ -160,6 +164,7 @@ public enum Status {
     WRONG_INPUT,
     [EnumMember]
     LOGIN_SUCCEDED
+
 }
 
 [DataContract]
@@ -188,6 +193,23 @@ public class Player
     public override int GetHashCode()
     {
         return Id.GetHashCode();
+    }
+
+    public override string ToString()
+    {
+        return string.Format("id: {0}, Name: {1}, Family: {2}", Id, Name, Family);
+    }
+
+    public static implicit operator Player(LocalCheckersService.Player v)
+    {
+        if (v == null) return null;
+        return new Player { Id = v.Id, Family = v.Family, Name = v.Name, Password = v.Password };
+    }
+
+    public static implicit operator LocalCheckersService.Player(Player v)
+    {
+        if (v == null) return null;
+        return new LocalCheckersService.Player { Id = v.Id, Family = v.Family, Name = v.Name, Password = v.Password };
     }
 }
 
@@ -219,6 +241,32 @@ public class Game
         return Id.GetHashCode();
     }
 
+    public override string ToString()
+    {
+        return string.Format("Id: {0}, Player1: {1}, Player2: {2}", Id, Player1, Player2);
+    }
+
+    public static implicit operator Game(LocalCheckersService.Game v)
+    {
+        if (v == null) return null;
+        return new Game{
+            CreatedDateTime = v.CreatedDateTime,
+            Id = v.Id,
+            Player1 = v.Player1,
+            Player2 = v.Player2
+        };
+    }
+
+    public static implicit operator LocalCheckersService.Game(Game v)
+    {
+        if (v == null) return null;
+        return new LocalCheckersService.Game {
+            CreatedDateTime = v.CreatedDateTime,
+            Id = v.Id,
+            Player1 = v.Player1,
+            Player2 = v.Player2
+        };
+    }
 }
 
 [DataContract]
@@ -243,6 +291,28 @@ public class Family
     public override int GetHashCode()
     {
         return Id.GetHashCode();
+    }
+    public override string ToString()
+    {
+        return string.Format("Id: {0}, Name: {1}", Id, Name);
+    }
+
+    public static implicit operator Family(LocalCheckersService.Family v)
+    {
+        if (v == null) return null;
+        return new Family {
+            Id = v.Id,
+            Name = v.Name
+        };
+    }
+
+    public static implicit operator LocalCheckersService.Family(Family v)
+    {
+        if (v == null) return null;
+        return new LocalCheckersService.Family {
+            Id = v.Id,
+            Name = v.Name
+        };
     }
 }
 
@@ -276,15 +346,46 @@ public class Move
     {
         return Id.GetHashCode();
     }
+
+    public override string ToString()
+    {
+        return string.Format("Id: {0}, Player_Id: {1}, From: {2}, To: {3}", Id, PlayerId, From, To);
+    }
+
+    public static implicit operator Move(LocalCheckersService.Move v)
+    {
+        if (v == null) return null;
+        return new Move {
+            Id = v.Id,
+            GameId = v.GameId,
+            PlayerId = v.PlayerId,
+            DateTime = v.DateTime,
+            From = v.From,
+            To = v.To
+        };
+    }
+
+    public static implicit operator LocalCheckersService.Move(Move v)
+    {
+        if (v == null) return null;
+        return new LocalCheckersService.Move {
+            Id = v.Id,
+            GameId = v.GameId,
+            PlayerId = v.PlayerId,
+            DateTime = v.DateTime,
+            From = v.From,
+            To = v.To
+        };
+    }
 }
 
 [DataContract]
 public class Coordinate
 {
     [DataMember]
-    public int X { get; set; }
+    public int X { get; set; } // Rows
     [DataMember]
-    public int Y { get; set; }
+    public int Y { get; set; } // Columns
 
     public override bool Equals(object obj)
     {
@@ -303,7 +404,25 @@ public class Coordinate
 
     public override string ToString()
     {
-        return string.Format("({0,3}, {1,3})", X, Y);
+        return string.Format("(X = {0,3}, Y = {1,3})", X, Y);
+    }
+
+    public static implicit operator Coordinate(LocalCheckersService.Coordinate v)
+    {
+        if (v == null) return null;
+        return new Coordinate {
+            X = v.X,
+            Y = v.Y
+        };
+    }
+
+    public static implicit operator LocalCheckersService.Coordinate(Coordinate v)
+    {
+        if (v == null) return null;
+        return new LocalCheckersService.Coordinate {
+            X = v.X,
+            Y = v.Y
+        };
     }
 
 }

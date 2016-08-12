@@ -790,6 +790,8 @@ public partial class TblMove : INotifyPropertyChanging, INotifyPropertyChanged
 	
 	private int _To_Y;
 	
+	private bool _RivalEat;
+	
 	private EntityRef<TblGame> _TblGame;
 	
 	private EntityRef<TblPlayer> _TblPlayer;
@@ -814,6 +816,8 @@ public partial class TblMove : INotifyPropertyChanging, INotifyPropertyChanged
     partial void OnTo_XChanged();
     partial void OnTo_YChanging(int value);
     partial void OnTo_YChanged();
+    partial void OnRivalEatChanging(bool value);
+    partial void OnRivalEatChanged();
     #endregion
 	
 	public TblMove()
@@ -991,6 +995,26 @@ public partial class TblMove : INotifyPropertyChanging, INotifyPropertyChanged
 		}
 	}
 	
+	[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_RivalEat", DbType="Bit NOT NULL")]
+	public bool RivalEat
+	{
+		get
+		{
+			return this._RivalEat;
+		}
+		set
+		{
+			if ((this._RivalEat != value))
+			{
+				this.OnRivalEatChanging(value);
+				this.SendPropertyChanging();
+				this._RivalEat = value;
+				this.SendPropertyChanged("RivalEat");
+				this.OnRivalEatChanged();
+			}
+		}
+	}
+	
 	[global::System.Data.Linq.Mapping.AssociationAttribute(Name="TblGame_TblMove", Storage="_TblGame", ThisKey="idGame", OtherKey="Id", IsForeignKey=true, DeleteOnNull=true, DeleteRule="CASCADE")]
 	public TblGame TblGame
 	{
@@ -1088,9 +1112,9 @@ public partial class TblPlayer : INotifyPropertyChanging, INotifyPropertyChanged
 	
 	private int _Id;
 	
-	private string _Name;
-	
 	private string _Password;
+	
+	private string _Name;
 	
 	private EntitySet<TblPlayerGame> _TblPlayerGames;
 	
@@ -1104,10 +1128,10 @@ public partial class TblPlayer : INotifyPropertyChanging, INotifyPropertyChanged
     partial void OnCreated();
     partial void OnIdChanging(int value);
     partial void OnIdChanged();
-    partial void OnNameChanging(string value);
-    partial void OnNameChanged();
     partial void OnPasswordChanging(string value);
     partial void OnPasswordChanged();
+    partial void OnNameChanging(string value);
+    partial void OnNameChanged();
     #endregion
 	
 	public TblPlayer()
@@ -1138,26 +1162,6 @@ public partial class TblPlayer : INotifyPropertyChanging, INotifyPropertyChanged
 		}
 	}
 	
-	[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Name", DbType="VarChar(20) NOT NULL", CanBeNull=false)]
-	public string Name
-	{
-		get
-		{
-			return this._Name;
-		}
-		set
-		{
-			if ((this._Name != value))
-			{
-				this.OnNameChanging(value);
-				this.SendPropertyChanging();
-				this._Name = value;
-				this.SendPropertyChanged("Name");
-				this.OnNameChanged();
-			}
-		}
-	}
-	
 	[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Password", DbType="VarChar(20) NOT NULL", CanBeNull=false)]
 	public string Password
 	{
@@ -1174,6 +1178,26 @@ public partial class TblPlayer : INotifyPropertyChanging, INotifyPropertyChanged
 				this._Password = value;
 				this.SendPropertyChanged("Password");
 				this.OnPasswordChanged();
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Name", DbType="VarChar(20) NOT NULL", CanBeNull=false)]
+	public string Name
+	{
+		get
+		{
+			return this._Name;
+		}
+		set
+		{
+			if ((this._Name != value))
+			{
+				this.OnNameChanging(value);
+				this.SendPropertyChanging();
+				this._Name = value;
+				this.SendPropertyChanged("Name");
+				this.OnNameChanged();
 			}
 		}
 	}

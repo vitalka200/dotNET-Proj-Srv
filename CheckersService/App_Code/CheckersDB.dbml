@@ -43,6 +43,7 @@
       <Column Name="From_Y" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="To_X" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="To_Y" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="RivalEat" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
       <Association Name="TblGame_TblMove" Member="TblGame" ThisKey="idGame" OtherKey="Id" Type="TblGame" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
       <Association Name="TblPlayer_TblMove" Member="TblPlayer" ThisKey="idPlayer" OtherKey="Id" Type="TblPlayer" IsForeignKey="true" />
     </Type>
@@ -50,8 +51,8 @@
   <Table Name="dbo.TblPlayer" Member="TblPlayers">
     <Type Name="TblPlayer">
       <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
-      <Column Name="Name" Type="System.String" DbType="VarChar(20) NOT NULL" CanBeNull="false" />
       <Column Name="Password" Type="System.String" DbType="VarChar(20) NOT NULL" CanBeNull="false" />
+      <Column Name="Name" Type="System.String" DbType="VarChar(20) NOT NULL" CanBeNull="false" />
       <Association Name="TblPlayer_TblPlayerGame" Member="TblPlayerGames" ThisKey="Id" OtherKey="idPlayer" Type="TblPlayerGame" />
       <Association Name="TblPlayer_TblFamilyPlayer" Member="TblFamilyPlayers" ThisKey="Id" OtherKey="idPlayer" Type="TblFamilyPlayer" />
       <Association Name="TblPlayer_TblMove" Member="TblMoves" ThisKey="Id" OtherKey="idPlayer" Type="TblMove" />

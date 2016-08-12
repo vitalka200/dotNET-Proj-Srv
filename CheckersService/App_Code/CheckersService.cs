@@ -5,12 +5,15 @@ using System.Runtime.Serialization;
 using System.ServiceModel;
 using System.ServiceModel.Web;
 using System.Text;
+using System.Threading;
 
 [ServiceBehavior(ConcurrencyMode = ConcurrencyMode.Multiple, InstanceContextMode = InstanceContextMode.Single)]
 public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISoapCheckersService // Interfaces
 {
     private const int MAX_COLLS = 4;
     private const int MAX_ROWS = 8;
+    private const int TOTAL_CHEKERS = 4;
+    private const int COMPUTER_USER_ID = 5;
     private Coordinate INITIAL_POINT = new Coordinate { X = -1, Y = -1};
 
     private Dictionary<Player, IDuplexCheckersServiceCallback> lookupPlayer2Callback = new Dictionary<Player, IDuplexCheckersServiceCallback>();
@@ -21,21 +24,30 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
     {
         if (game != null && game.Player1 != null && game.Player2 != null)
         {
-            CheckersDBDataContext db = new CheckersDBDataContext();
-            TblGame gameToSave = new TblGame { CreatedDate = game.CreatedDateTime };
-            db.TblGames.Attach(gameToSave);
-            db.SubmitChanges();
+            CreateNewGame(game);
+            return true;
+        }
+        return false;
+    }
 
-            TblPlayerGame[] gameToPlayer = {
+    public Game CreateNewGame(Game game)
+    {
+        CheckersDBDataContext db = new CheckersDBDataContext();
+        TblGame gameToSave = new TblGame { CreatedDate = game.CreatedDateTime };
+        db.TblGames.InsertOnSubmit(gameToSave);
+        db.SubmitChanges();
+
+        gameToSave = db.TblGames.Where(g => g.CreatedDate == game.CreatedDateTime).First();
+
+        TblPlayerGame[] gameToPlayer = {
                 new TblPlayerGame { idGame = gameToSave.Id, idPlayer = game.Player1.Id },
                 new TblPlayerGame { idGame = gameToSave.Id, idPlayer = game.Player2.Id }
             };
 
-            db.TblPlayerGames.AttachAll(gameToPlayer);
-            db.SubmitChanges();
-            return true;
-        }
-        return false;
+        db.TblPlayerGames.InsertAllOnSubmit(gameToPlayer);
+        db.SubmitChanges();
+
+        return new Game { Id = gameToSave.Id, Player1 = game.Player1, Player2 = game.Player2, CreatedDateTime = gameToSave.CreatedDate};
     }
 
     public bool AddPlayer(Player player)
@@ -44,7 +56,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         try
         {
             CheckersDBDataContext db = new CheckersDBDataContext();
-            if (db.TblPlayers.SingleOrDefault(p => p.Id == player.Id || p.Name == player.Name) != null)
+            if (db.TblPlayers.SingleOrDefault(p => p.Name == player.Name) != null)
             {
                 return false;
             }
@@ -54,6 +66,10 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 { return false; }
 
                 TblPlayer newTblPlayer = new TblPlayer { Name = player.Name, Password = player.Password };
+                db.TblPlayers.InsertOnSubmit(newTblPlayer);
+                db.SubmitChanges();
+
+                newTblPlayer = db.TblPlayers.Where(p=>p.Name == player.Name && p.Password == player.Password).First();
 
                 if (player.Family != null && player.Family.Id > 0)
                 {
@@ -68,10 +84,9 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                         db.TblFamilyPlayers.DeleteOnSubmit(x);
                     }
                     TblFamilyPlayer familyToPLayerBinding = new TblFamilyPlayer { idPlayer = player.Id, idFamily = player.Family.Id };
-                    db.TblFamilyPlayers.Attach(familyToPLayerBinding);
+                    db.TblFamilyPlayers.InsertOnSubmit(familyToPLayerBinding);
+                    db.SubmitChanges();
                 }
-                db.TblPlayers.Attach(newTblPlayer);
-                db.SubmitChanges();
             }
         }
         catch (Exception e) {  /* If we have any exception we just return false*/}
@@ -190,8 +205,8 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 gameMetaInfo0.idPlayer = game.Player1.Id;
                 gameMetaInfo1.idPlayer = game.Player2.Id;
 
-                db.TblPlayerGames.Attach(gameMetaInfo0);
-                db.TblPlayerGames.Attach(gameMetaInfo1);
+                db.TblPlayerGames.InsertOnSubmit(gameMetaInfo0);
+                db.TblPlayerGames.InsertOnSubmit(gameMetaInfo1);
                 db.SubmitChanges();
             }
             if (gamesMetaInfo.Count() > 0)
@@ -199,7 +214,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 TblPlayerGame gameMetaInfo0 = gamesMetaInfo.ElementAt(0);
                 gameMetaInfo0.idPlayer = game.Player1.Id;
                 TblPlayerGame gameMetaInfo1 = new TblPlayerGame { idGame = game.Id, idPlayer = game.Player2.Id };
-                db.TblPlayerGames.Attach(gameMetaInfo1);
+                db.TblPlayerGames.InsertOnSubmit(gameMetaInfo1);
                 db.SubmitChanges();
             }
         }
@@ -224,7 +239,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 if (db.TblFamilies.Where(f => f.Id == player.Family.Id).Count() > 0)
                 {
                     TblFamilyPlayer familyToPlayer4DB = new TblFamilyPlayer { idPlayer = player.Id, idFamily = player.Family.Id };
-                    db.TblFamilyPlayers.Attach(familyToPlayer4DB);
+                    db.TblFamilyPlayers.InsertOnSubmit(familyToPlayer4DB);
                 }
                 else
                 { // No such family. need first create one
@@ -235,7 +250,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             {
                 TblFamilyPlayer familyToPlayerFromDb = familiesToPlayerFromDb.First();
                 familyToPlayerFromDb.idFamily = player.Family.Id;
-                db.TblFamilyPlayers.Attach(familyToPlayerFromDb);
+                db.TblFamilyPlayers.InsertOnSubmit(familyToPlayerFromDb);
             }
 
             db.SubmitChanges();
@@ -276,7 +291,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         }
         if (players.Count > 1)
         {
-            game.Player1 = players.ElementAtOrDefault(1);
+            game.Player2 = players.ElementAtOrDefault(1);
         }
 
         return game;
@@ -294,7 +309,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             else
             {
                 TblFamily tblFamily = new TblFamily { Name = family.Name };
-                db.TblFamilies.Attach(tblFamily);
+                db.TblFamilies.InsertOnSubmit(tblFamily);
             }
             db.SubmitChanges();
         }
@@ -371,80 +386,117 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         Player player = GetPlayerById(move.PlayerId.ToString());
         IDuplexCheckersServiceCallback storedCallback = null;
         Status status = Status.WRONG_INPUT;
-        List<Move> availableMoves = null;
 
         if (lookupPlayer2Callback.TryGetValue(player, out storedCallback))
         {    
-            status = StoreMove(move, player, out availableMoves);
+            status = StoreMove(move, player);
         }
         else
         {
             status = Status.NOT_LOGGED_IN;
         }
         sessionCallback.MakeMoveCallback(status);
+
     }
 
-    private Status StoreMove(Move move, Player player, out List<Move> availableMoves)
+    private Status StoreMove(Move move, Player player)
     {
         Status status = Status.WRONG_INPUT;
-        availableMoves = new List<Move>();
         try
         {
+            CheckersDBDataContext db = new CheckersDBDataContext();
             Game game = GetGameById(move.GameId.ToString());
 
-            TblMove tblMove = new TblMove {
-                idPlayer = move.PlayerId,
-                idGame = move.GameId,
-                From_X = move.From.X,
-                From_Y = move.From.Y,
-                To_X = move.To.X,
-                To_Y = move.To.Y,
-                CreatedDate = move.DateTime
-            };
+            Player player2 = game.Player1.Equals(player) ? game.Player2 : game.Player1;
 
+            bool wasEaten = false;
+            bool isMoveValid = MoveIsValid(player, game, move, out wasEaten);
+            bool reachedEnd = ReachedEndOfBoard(game, player, move);
+            bool noMoreRivalChekers = GetEatenRivalCheckersByGame(game, player) >= TOTAL_CHEKERS;
 
-
-            Player player2 = null;
-            if (game.Player1.Equals(player)) { player2 = game.Player2; }
-            else { player2 = game.Player1; }
-
-            availableMoves = GetAvailableMoves(player, game, move);
-            if (MoveIsValid(player, game, move) && availableMoves.Count > 0)
+            if (isMoveValid)
             {
-                Move lastMove = GetMovesByGame(game.Id.ToString()).Last();
-                lookupPlayer2Callback[player2].PlayerTurnCallback(lastMove);
+                TblMove tblMove = new TblMove {
+                    idPlayer = move.PlayerId,
+                    idGame = move.GameId,
+                    From_X = move.From.X,
+                    From_Y = move.From.Y,
+                    To_X = move.To.X,
+                    To_Y = move.To.Y,
+                    CreatedDate = move.DateTime,
+                    RivalEat = wasEaten
+                };
                 status = Status.MOVE_ACCEPTED;
+                db.TblMoves.InsertOnSubmit(tblMove);
+                db.SubmitChanges();
+
+                lookupPlayer2Callback[player2].PlayerTurnCallback(move);
             }
-            else
+            if (isMoveValid && reachedEnd)//If reached end, game won
+            {
+                status = Status.GAME_WIN;
+                lookupPlayer2Callback[player2].GameEnd(move, Status.GAME_LOSE);
+            }
+            if (isMoveValid && wasEaten && noMoreRivalChekers)
             {
                 status = Status.GAME_LOSE;
-
-                
-                lookupPlayer2Callback[player2].MakeMoveCallback(Status.GAME_WIN);
+                lookupPlayer2Callback[player2].GameEnd(move, Status.GAME_WIN);
             }
         } catch (Exception e) { }
 
         return status;
     }
 
-    private bool MoveIsValid(Player player, Game game, Move move)
+    private bool ReachedEndOfBoard(Game game, Player player, Move move)
+    {
+        List<Move> moves = RecoverGameMovesByPlayer(game, player);
+
+        if (moves.Count < 1) return false; // Game wasn't started
+        Move firstMove = moves.First();
+        if (firstMove.To.X < 3) // Black Player
+        {
+            return move.To.X == MAX_ROWS;
+        }
+        else // White Player
+        {
+            return move.To.X == 0;
+        }
+    }
+
+    private int GetEatenRivalCheckersByGame(Game game, Player player)
+    {
+        CheckersDBDataContext db = new CheckersDBDataContext();
+        Player player2 = game.Player1.Equals(player) ? game.Player2 : game.Player1;
+        var eatMoves =
+            from m in db.TblMoves
+            where m.RivalEat == true && m.idPlayer == player2.Id
+            select m;
+
+        return eatMoves.Count();
+    }
+
+    private bool MoveIsValid(Player player, Game game, Move move, out bool wasEaten)
     {
         Coordinate from = move.From;
         Coordinate to = move.To;
         Player player2 = game.Player1.Equals(player) ? game.Player2 : game.Player1;
+        wasEaten = false;
 
-        if (to.X > MAX_COLLS || to.X < 0 || to.Y > MAX_ROWS || to.Y < 0) return false;
-        Coordinate delta = new Coordinate { X = to.X - from.X, Y = to.Y - from.Y };
+        if (to.X > MAX_ROWS || to.X < 0 || to.Y > MAX_COLLS || to.Y < 0) return false;
+        Coordinate delta = new Coordinate { X = to.X - from.X, Y = Math.Abs(to.Y - from.Y) };
 
-        if (delta.X < 0 || delta.Y < 0) return false; // Jump outside the game plate
+        if (delta.Y < 0) return false; // we going back. that not allowed
         if (delta.X > 2 || delta.Y > 2) return false; // Too long jump
         if (delta.X > 1 && delta.Y > 1) // we trying to eat somebody
         {
             // Get moves of other player in middle point
-            Coordinate point = new Coordinate { };
+            int deltaColl = (to.Y > from.Y) ? 1 : -1; // Get coordinate of assumed rival
+
+            Coordinate point = new Coordinate { X = from.X + 1, Y = from.Y + deltaColl };
             List<TblMove> moves = GetMovesByCoordinatesAndPlayer(point, player2);
             if (moves.Count > 0) // We actually eating some soldier
             {
+                wasEaten = true;
                 return true;
             }
             else
@@ -452,7 +504,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 return false;
             }
         }
-        return false;
+        return true;
     }
 
     private List<TblMove> GetMovesByCoordinatesAndPlayer(Coordinate point, Player player)
@@ -464,11 +516,6 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             orderby m.Id ascending
             select m;
         return moves.ToList();
-    }
-
-    private List<Move> GetAvailableMoves(Player player, Game game, Move move)
-    {
-        throw new NotImplementedException();
     }
 
     public void Login(string name, string password)
@@ -540,6 +587,21 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         Status status = Status.GAME_STARTED;
         Player player = null;
 
+        if (computerRival)
+        {
+            ComputerPlayer.ComputerPlayer computerPlayer = new ComputerPlayer.ComputerPlayer();
+            game = CreateNewGame(new Game { Player1 = game.Player1, Player2 = GetPlayerById(COMPUTER_USER_ID.ToString()), CreatedDateTime = game.CreatedDateTime });
+            computerPlayer.StartGameWithComputerPlayer(game);
+
+            Thread computerPlayerThread = new Thread(new ParameterizedThreadStart((_) => {
+                while (computerPlayer.GameIsRunning)
+                {
+                    Thread.Sleep(1000);
+                };
+            }));
+            computerPlayerThread.Start();
+        }
+
         if (!lookupCallback2Player.TryGetValue(cb, out player))
         {
             status = Status.NOT_LOGGED_IN;
@@ -550,13 +612,13 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             {
                 if (game != null) // Game exists
                 {
-                    if ((game.Player1 == null || game.Player1.Equals(player)) && game.Player2 != null && !game.Player2.Equals(player)) //Joining as Player1 or reconecting after a disctonnect
+                    if ((player.Equals(game.Player1) || game.Player1 == null) && game.Player2 != null) //Joining as Player1 or reconecting after a disctonnect
                     {
                         game.Player1 = player;
                         UpdateGame(game);
                         status = sendStartGameWakeupToSecondPlayer(game.Player2, game);
                     }
-                    else if ((game.Player2 == null || game.Player2.Equals(player)) && game.Player1 != null && !game.Player1.Equals(player)) // Joining As Player2 or reconnection after disconnect
+                    else if ((player.Equals(game.Player2) || game.Player2 == null) && game.Player1 != null) // Joining As Player2 or reconnection after disconnect
                     {
                         game.Player2 = player;
                         UpdateGame(game);
@@ -601,11 +663,11 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
     {
         if (initialPositions.Count > 0 && Status.GAME_STARTED == gameStatus)
         {
-            List<TblMove> initialMoves = new List<TblMove>();
+            CheckersDBDataContext db = new CheckersDBDataContext();
+            
             foreach (var move in initialPositions)
             {
-                initialMoves.Add(new TblMove
-                {
+                TblMove tblMove = new TblMove {
                     CreatedDate = move.DateTime,
                     idPlayer = move.PlayerId,
                     idGame = move.GameId,
@@ -613,12 +675,12 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                     From_Y = INITIAL_POINT.Y,
                     To_X = move.To.X,
                     To_Y = move.To.Y,
-                });
+                };
+
+                db.TblMoves.InsertOnSubmit(tblMove);
+                db.SubmitChanges();
                 
             }
-            CheckersDBDataContext db = new CheckersDBDataContext();
-            db.TblMoves.InsertAllOnSubmit(initialMoves);
-            db.SubmitChanges();
 
             Player player = GetPlayerById(initialPositions[0].PlayerId.ToString());
             Game game = GetGameById(initialPositions[0].GameId.ToString());

@@ -21,6 +21,7 @@ CREATE TABLE [dbo].[TblMove] (
     [From_Y]      INT  NOT NULL,
     [To_X]        INT  NOT NULL,
     [To_Y]        INT  NOT NULL,
+	[RivalEat]    BIT NOT NULL,
     PRIMARY KEY CLUSTERED ([Id] ASC),
 	CONSTRAINT [FK_MoPl_ToPl] FOREIGN KEY ([idPlayer]) REFERENCES [dbo].[TblPlayer] ([Id]),
 	CONSTRAINT [FK_GaMo_ToGa] FOREIGN KEY ([idGame]) REFERENCES [dbo].[TblGame] ([Id]) ON DELETE CASCADE,
