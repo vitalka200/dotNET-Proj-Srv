@@ -13,17 +13,15 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
     private const int MAX_ROWS = 8;
     private Coordinate INITIAL_POINT = new Coordinate { X = -1, Y = -1};
 
-    private CheckersDBDataContext db = new CheckersDBDataContext();
     private Dictionary<Player, IDuplexCheckersServiceCallback> lookupPlayer2Callback = new Dictionary<Player, IDuplexCheckersServiceCallback>();
     private Dictionary<IDuplexCheckersServiceCallback, Player> lookupCallback2Player = new Dictionary<IDuplexCheckersServiceCallback, Player>();
 
-    private Object DB_WRITE_LOCK = new Object();
 
     public bool AddGame(Game game)
     {
         if (game != null && game.Player1 != null && game.Player2 != null)
         {
-
+            CheckersDBDataContext db = new CheckersDBDataContext();
             TblGame gameToSave = new TblGame { CreatedDate = game.CreatedDateTime };
             db.TblGames.Attach(gameToSave);
             db.SubmitChanges();
@@ -45,7 +43,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
         try
         {
-
+            CheckersDBDataContext db = new CheckersDBDataContext();
             if (db.TblPlayers.SingleOrDefault(p => p.Id == player.Id || p.Name == player.Name) != null)
             {
                 return false;
@@ -82,6 +80,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
     public List<Game> GetGames()
     {
+        CheckersDBDataContext db = new CheckersDBDataContext();
         var games =
             from g in db.TblGames
             select new Game { Id = g.Id, CreatedDateTime = g.CreatedDate };
@@ -90,6 +89,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
     public List<Game> GetGamesByPlayerId(string playerId)
     {
+        CheckersDBDataContext db = new CheckersDBDataContext();
         int id = Convert.ToInt32(playerId);
         var gamesFromDB =
             from g in db.TblGames
@@ -111,6 +111,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
     public List<Player> GetPlayersByGame(string gameId)
     {
+        CheckersDBDataContext db = new CheckersDBDataContext();
         int id = Convert.ToInt32(gameId);
         var players =
             from p in db.TblPlayers
@@ -124,7 +125,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
     public List<Player> GetPlayers()
     {
-
+        CheckersDBDataContext db = new CheckersDBDataContext();
         var players =
             from p in db.TblPlayers
             join pf in db.TblFamilyPlayers on p.Id equals pf.idPlayer
@@ -135,12 +136,14 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
     public int GetTotalGamesCountForPlayer(string playerId)
     {
+        CheckersDBDataContext db = new CheckersDBDataContext();
         int id = Convert.ToInt32(playerId);
         return db.TblPlayerGames.Where(pg => pg.idPlayer == id).Count();
     }
 
     public bool RemoveGame(string gameId)
     {
+        CheckersDBDataContext db = new CheckersDBDataContext();
         int id = Convert.ToInt32(gameId);
         var x = db.TblGames.SingleOrDefault(g => g.Id == id);
         if (x != null)
@@ -154,6 +157,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
     public bool RemovePlayer(string playerId)
     {
+        CheckersDBDataContext db = new CheckersDBDataContext();
         int id = Convert.ToInt32(playerId);
         var x = db.TblPlayerGames.SingleOrDefault(p => p.Id == id);
         if (x != null)
@@ -170,6 +174,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         // Update Game
         try
         {
+            CheckersDBDataContext db = new CheckersDBDataContext();
             // The only thing that we can update in game it's player binding
             var gamesMetaInfo = db.TblPlayerGames.Where(pg => pg.idGame == game.Id);
 
@@ -184,23 +189,18 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 TblPlayerGame gameMetaInfo1 = gamesMetaInfo.ElementAt(1);
                 gameMetaInfo0.idPlayer = game.Player1.Id;
                 gameMetaInfo1.idPlayer = game.Player2.Id;
-                lock (DB_WRITE_LOCK)
-                {
-                    db.TblPlayerGames.Attach(gameMetaInfo0);
-                    db.TblPlayerGames.Attach(gameMetaInfo1);
-                    db.SubmitChanges();
-                }
+
+                db.TblPlayerGames.Attach(gameMetaInfo0);
+                db.TblPlayerGames.Attach(gameMetaInfo1);
+                db.SubmitChanges();
             }
             if (gamesMetaInfo.Count() > 0)
             {
                 TblPlayerGame gameMetaInfo0 = gamesMetaInfo.ElementAt(0);
                 gameMetaInfo0.idPlayer = game.Player1.Id;
                 TblPlayerGame gameMetaInfo1 = new TblPlayerGame { idGame = game.Id, idPlayer = game.Player2.Id };
-                lock(DB_WRITE_LOCK)
-                {
-                    db.TblPlayerGames.Attach(gameMetaInfo1);
-                    db.SubmitChanges();
-                }
+                db.TblPlayerGames.Attach(gameMetaInfo1);
+                db.SubmitChanges();
             }
         }
         catch (Exception e) { /* If we have any exception we just return false*/}
@@ -211,6 +211,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
     {
         try
         {
+            CheckersDBDataContext db = new CheckersDBDataContext();
             var playerFromDb = db.TblPlayers.SingleOrDefault(p => p.Id == player.Id);
 
             playerFromDb.Name = player.Name;
@@ -245,6 +246,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
     public Player GetPlayerById(string playerId)
     {
+        CheckersDBDataContext db = new CheckersDBDataContext();
         int id = Convert.ToInt32(playerId);
         var player =
             from p in db.TblPlayers
@@ -257,6 +259,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
     public Game GetGameById(string gameId)
     {
+        CheckersDBDataContext db = new CheckersDBDataContext();
         int id = Convert.ToInt32(gameId);
         var games =
             from g in db.TblGames
@@ -283,6 +286,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
     {
         try
         {
+            CheckersDBDataContext db = new CheckersDBDataContext();
             if (family == null || family.Name == null || db.TblFamilies.Where(f => f.Id == family.Id).Count() > 0)
             {
                 return false;
@@ -302,6 +306,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
     {
         try
         {
+            CheckersDBDataContext db = new CheckersDBDataContext();
             int id = Convert.ToInt32(familyId);
             var x = db.TblFamilies.SingleOrDefault(p => p.Id == id);
             if (x != null)
@@ -317,6 +322,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
     public Family GetFamily(string familyId)
     {
+        CheckersDBDataContext db = new CheckersDBDataContext();
         int id = Convert.ToInt32(familyId);
         var family =
             from f in db.TblFamilies
@@ -327,6 +333,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
     public List<Player> GetPlayersByFamily(string familyId)
     {
+        CheckersDBDataContext db = new CheckersDBDataContext();
         int id = Convert.ToInt32(familyId);
         var players =
             from p in db.TblPlayers
@@ -339,6 +346,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
     public List<Move> GetMovesByGame(string gameId)
     {
+        CheckersDBDataContext db = new CheckersDBDataContext();
         int id = Convert.ToInt32(gameId);
         var moves =
             from m in db.TblMoves
@@ -449,6 +457,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
     private List<TblMove> GetMovesByCoordinatesAndPlayer(Coordinate point, Player player)
     {
+        CheckersDBDataContext db = new CheckersDBDataContext();
         var moves =
             from m in db.TblMoves
             where m.idPlayer == player.Id && (m.To_X == point.X && m.To_Y == point.Y)
@@ -502,6 +511,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         {
             try
             {
+                CheckersDBDataContext db = new CheckersDBDataContext();
                 var tblPlayer = db.TblPlayers.SingleOrDefault(p => p.Name == name && p.Password == password);
                 player = GetPlayerById(tblPlayer.Id.ToString());
             }
@@ -606,12 +616,9 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 });
                 
             }
-
-            lock (DB_WRITE_LOCK)
-            {
-                db.TblMoves.InsertAllOnSubmit(initialMoves);
-                db.SubmitChanges();
-            }
+            CheckersDBDataContext db = new CheckersDBDataContext();
+            db.TblMoves.InsertAllOnSubmit(initialMoves);
+            db.SubmitChanges();
 
             Player player = GetPlayerById(initialPositions[0].PlayerId.ToString());
             Game game = GetGameById(initialPositions[0].GameId.ToString());
