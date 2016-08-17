@@ -452,6 +452,12 @@
   <wsdl:message name="IRestCheckersService_GetFamily_OutputMessage">
     <wsdl:part name="parameters" element="tns:GetFamilyResponse" />
   </wsdl:message>
+  <wsdl:message name="IRestCheckersService_UpdateFamily_InputMessage">
+    <wsdl:part name="parameters" element="tns:UpdateFamily" />
+  </wsdl:message>
+  <wsdl:message name="IRestCheckersService_UpdateFamily_OutputMessage">
+    <wsdl:part name="parameters" element="tns:UpdateFamilyResponse" />
+  </wsdl:message>
   <wsdl:message name="IRestCheckersService_GetPlayersByFamily_InputMessage">
     <wsdl:part name="parameters" element="tns:GetPlayersByFamily" />
   </wsdl:message>
@@ -568,6 +574,10 @@
       <wsdl:input wsaw:Action="http://tempuri.org/IRestCheckersService/GetFamily" message="tns:IRestCheckersService_GetFamily_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IRestCheckersService/GetFamilyResponse" message="tns:IRestCheckersService_GetFamily_OutputMessage" />
     </wsdl:operation>
+    <wsdl:operation name="UpdateFamily">
+      <wsdl:input wsaw:Action="http://tempuri.org/IRestCheckersService/UpdateFamily" message="tns:IRestCheckersService_UpdateFamily_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IRestCheckersService/UpdateFamilyResponse" message="tns:IRestCheckersService_UpdateFamily_OutputMessage" />
+    </wsdl:operation>
     <wsdl:operation name="GetPlayersByFamily">
       <wsdl:input wsaw:Action="http://tempuri.org/IRestCheckersService/GetPlayersByFamily" message="tns:IRestCheckersService_GetPlayersByFamily_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/IRestCheckersService/GetPlayersByFamilyResponse" message="tns:IRestCheckersService_GetPlayersByFamily_OutputMessage" />
@@ -671,7 +681,7 @@
       <wsa10:EndpointReference>
         <wsa10:Address>http://localhost:52958/Service.svc/client</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-          <Upn>HOME-PC\vitalka200</Upn>
+          <Upn>DEVELOP-PC\vitalka200</Upn>
         </Identity>
       </wsa10:EndpointReference>
     </wsdl:port>

@@ -14,10 +14,14 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
     private const int MAX_ROWS = 8;
     private const int TOTAL_CHEKERS = 4;
     private const int COMPUTER_USER_ID = 5;
+    private const int NO_WINNER = 0;
+    private const int FIRST_WON = 1;
+    private const int SECOND_WON = 2;
     private Coordinate INITIAL_POINT = new Coordinate { X = -1, Y = -1};
 
     private Dictionary<Player, IDuplexCheckersServiceCallback> lookupPlayer2Callback = new Dictionary<Player, IDuplexCheckersServiceCallback>();
     private Dictionary<IDuplexCheckersServiceCallback, Player> lookupCallback2Player = new Dictionary<IDuplexCheckersServiceCallback, Player>();
+
 
 
     public bool AddGame(Game game)
@@ -47,7 +51,14 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         db.TblPlayerGames.InsertAllOnSubmit(gameToPlayer);
         db.SubmitChanges();
 
-        return new Game { Id = gameToSave.Id, Player1 = game.Player1, Player2 = game.Player2, CreatedDateTime = gameToSave.CreatedDate};
+        return new Game {
+            Id = gameToSave.Id,
+            Player1 = game.Player1,
+            Player2 = game.Player2,
+            CreatedDateTime = gameToSave.CreatedDate,
+            GameStatus = (Status)Enum.Parse(typeof(Status), gameToSave.Status, true),
+            WinnerPlayerNum = gameToSave.WinnerPlayerNum
+        };
     }
 
     public bool AddPlayer(Player player)
@@ -96,10 +107,38 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
     public List<Game> GetGames()
     {
         CheckersDBDataContext db = new CheckersDBDataContext();
-        var games =
+        var gamesFromDB =
             from g in db.TblGames
-            select new Game { Id = g.Id, CreatedDateTime = g.CreatedDate };
-        return games.ToList();
+            select new Game {
+                Id = g.Id,
+                CreatedDateTime = g.CreatedDate,
+                GameStatus = (Status)Enum.Parse(typeof(Status), g.Status, true),
+                WinnerPlayerNum = g.WinnerPlayerNum
+            };
+
+        List<Game> games = gamesFromDB.ToList();
+
+        for (int i = 0; i < games.Count(); i++)
+        {
+            List<Player> players = GetPlayersByGame(games[i].Id.ToString());
+            if (players.Count > 0)
+            {
+                games[i].Player1 = players.ElementAtOrDefault(0);
+            }
+            if (players.Count > 1)
+            {
+                games[i].Player2 = players.ElementAtOrDefault(1);
+            }
+        }
+
+        var result =
+            from g in games
+            where !g.GameStatus.Equals(Status.GAME_COMPLETED) && // we need games that not completed for client
+                    // And we don't want to show computer games
+                    !((g.Player1 != null && g.Player1.Id == COMPUTER_USER_ID) || (g.Player2 != null && g.Player2.Id == COMPUTER_USER_ID))
+            select g;
+
+        return result.ToList();
     }
 
     public List<Game> GetGamesByPlayerId(string playerId)
@@ -110,7 +149,12 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             from g in db.TblGames
             join pg in db.TblPlayerGames on g.Id equals pg.idGame
             where pg.idPlayer == id
-            select new Game { Id = g.Id, CreatedDateTime = g.CreatedDate };
+            select new Game {
+                Id = g.Id,
+                CreatedDateTime = g.CreatedDate,
+                GameStatus = (Status)Enum.Parse(typeof(Status), g.Status, true),
+                WinnerPlayerNum = g.WinnerPlayerNum
+            };
 
         List<Game> games = gamesFromDB.ToList();
 
@@ -121,7 +165,14 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             games[i].Player2 = players.ElementAtOrDefault(1);
         }
 
-        return games;
+        var result =
+            from g in games
+            where !g.GameStatus.Equals(Status.GAME_COMPLETED) && // we need games that not completed for client
+                    // And we don't want to show computer games
+                    !((g.Player1 != null && g.Player1.Id == COMPUTER_USER_ID) || (g.Player2 != null && g.Player2.Id == COMPUTER_USER_ID))
+            select g;
+
+        return games.ToList();
     }
 
     public List<Player> GetPlayersByGame(string gameId)
@@ -192,6 +243,12 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             CheckersDBDataContext db = new CheckersDBDataContext();
             // The only thing that we can update in game it's player binding
             var gamesMetaInfo = db.TblPlayerGames.Where(pg => pg.idGame == game.Id);
+            var gameFromDb = db.TblGames.Where(g => g.Id == game.Id).First();
+
+            if (!gameFromDb.Status.Equals(game.GameStatus))// Changed game status
+            {
+                gameFromDb.Status = game.GameStatus.ToString();
+            }
 
             if (gamesMetaInfo.Count() == 0)
             {
@@ -205,8 +262,8 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 gameMetaInfo0.idPlayer = game.Player1.Id;
                 gameMetaInfo1.idPlayer = game.Player2.Id;
 
-                db.TblPlayerGames.InsertOnSubmit(gameMetaInfo0);
-                db.TblPlayerGames.InsertOnSubmit(gameMetaInfo1);
+                //db.TblPlayerGames.InsertOnSubmit(gameMetaInfo0);
+                //db.TblPlayerGames.InsertOnSubmit(gameMetaInfo1);
                 db.SubmitChanges();
             }
             if (gamesMetaInfo.Count() > 0)
@@ -214,9 +271,10 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 TblPlayerGame gameMetaInfo0 = gamesMetaInfo.ElementAt(0);
                 gameMetaInfo0.idPlayer = game.Player1.Id;
                 TblPlayerGame gameMetaInfo1 = new TblPlayerGame { idGame = game.Id, idPlayer = game.Player2.Id };
-                db.TblPlayerGames.InsertOnSubmit(gameMetaInfo1);
+                //db.TblPlayerGames.InsertOnSubmit(gameMetaInfo1);
                 db.SubmitChanges();
             }
+
         }
         catch (Exception e) { /* If we have any exception we just return false*/}
         return false;
@@ -250,7 +308,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             {
                 TblFamilyPlayer familyToPlayerFromDb = familiesToPlayerFromDb.First();
                 familyToPlayerFromDb.idFamily = player.Family.Id;
-                db.TblFamilyPlayers.InsertOnSubmit(familyToPlayerFromDb);
+                //db.TblFamilyPlayers.InsertOnSubmit(familyToPlayerFromDb);
             }
 
             db.SubmitChanges();
@@ -281,7 +339,12 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             join pg in db.TblPlayerGames on g.Id equals pg.idGame
             join p in db.TblPlayers on pg.idPlayer equals p.Id
             where g.Id == id
-            select new Game { Id = g.Id, CreatedDateTime = g.CreatedDate };
+            select new Game {
+                Id = g.Id,
+                CreatedDateTime = g.CreatedDate,
+                GameStatus = (Status)Enum.Parse(typeof(Status), g.Status, true),
+                WinnerPlayerNum = g.WinnerPlayerNum
+            };
 
         Game game = games.First();
         List<Player> players = GetPlayersByGame(game.Id.ToString());
@@ -301,19 +364,40 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
     {
         try
         {
-            CheckersDBDataContext db = new CheckersDBDataContext();
-            if (family == null || family.Name == null || db.TblFamilies.Where(f => f.Id == family.Id).Count() > 0)
+            if (family != null || family.Name != null)
             {
-                return false;
+                CheckersDBDataContext db = new CheckersDBDataContext();
+                var familyFromDb = db.TblFamilies.SingleOrDefault(f => f.Name == family.Name);
+                //we already have this family
+                if (familyFromDb != null) { return false; }
+                else
+                {
+                    db.TblFamilies.InsertOnSubmit(new TblFamily { Name = family.Name });
+                    db.SubmitChanges();
+                }
+
+                return true;
             }
-            else
-            {
-                TblFamily tblFamily = new TblFamily { Name = family.Name };
-                db.TblFamilies.InsertOnSubmit(tblFamily);
-            }
-            db.SubmitChanges();
         }
         catch (Exception e) {  /* If we have any exception we just return false*/ }
+        return false;
+    }
+
+    public bool UpdateFamily(Family family)
+    {
+        if (family != null)
+        {
+            CheckersDBDataContext db = new CheckersDBDataContext();
+            var familyFromDb = db.TblFamilies.SingleOrDefault(f => f.Name == family.Name);
+            //we don't have this family
+            if (familyFromDb == null) { return false; }
+            else
+            {
+                familyFromDb.Name = family.Name;
+                db.SubmitChanges();
+            }
+            return true;
+        }
         return false;
     }
 
@@ -408,6 +492,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             Game game = GetGameById(move.GameId.ToString());
 
             Player player2 = game.Player1.Equals(player) ? game.Player2 : game.Player1;
+            
 
             bool wasEaten = false;
             bool isMoveValid = MoveIsValid(player, game, move, out wasEaten);
@@ -435,11 +520,17 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             if (isMoveValid && reachedEnd)//If reached end, game won
             {
                 status = Status.GAME_WIN;
+                game.GameStatus = Status.GAME_COMPLETED;
+                game.WinnerPlayerNum = game.Player1.Equals(player) ? 1 : 2; // Player 1 won the game
+                UpdateGame(game);
                 lookupPlayer2Callback[player2].GameEnd(move, Status.GAME_LOSE);
             }
-            if (isMoveValid && wasEaten && noMoreRivalChekers)
+            else if (isMoveValid && wasEaten && noMoreRivalChekers)
             {
                 status = Status.GAME_LOSE;
+                game.GameStatus = Status.GAME_COMPLETED;
+                game.WinnerPlayerNum = game.Player1.Equals(player) ? 2 : 1; // Player 2 won the game
+                UpdateGame(game);
                 lookupPlayer2Callback[player2].GameEnd(move, Status.GAME_WIN);
             }
         } catch (Exception e) { }
@@ -455,7 +546,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         Move firstMove = moves.First();
         if (firstMove.To.X < 3) // Black Player
         {
-            return move.To.X == MAX_ROWS;
+            return move.To.X == MAX_ROWS-1;
         }
         else // White Player
         {
@@ -482,10 +573,12 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         Player player2 = game.Player1.Equals(player) ? game.Player2 : game.Player1;
         wasEaten = false;
 
-        if (to.X > MAX_ROWS || to.X < 0 || to.Y > MAX_COLLS || to.Y < 0) return false;
+        if (to.X > MAX_ROWS-1 || to.X < 0 || to.Y > MAX_COLLS-1 || to.Y < 0) return false;
         Coordinate delta = new Coordinate { X = to.X - from.X, Y = Math.Abs(to.Y - from.Y) };
 
-        if (delta.Y < 0) return false; // we going back. that not allowed
+        if (delta.X < 0 && game.Player2.Equals(player)) return false; // we black and going back. that not allowed
+        if (delta.X > 0 && game.Player1.Equals(player)) return false; // we white and going back. that not allowed
+
         if (delta.X > 2 || delta.Y > 2) return false; // Too long jump
         if (delta.X > 1 && delta.Y > 1) // we trying to eat somebody
         {
@@ -615,12 +708,14 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                     if ((player.Equals(game.Player1) || game.Player1 == null) && game.Player2 != null) //Joining as Player1 or reconecting after a disctonnect
                     {
                         game.Player1 = player;
+                        game.GameStatus = Status.GAME_STARTED;
                         UpdateGame(game);
                         status = sendStartGameWakeupToSecondPlayer(game.Player2, game);
                     }
                     else if ((player.Equals(game.Player2) || game.Player2 == null) && game.Player1 != null) // Joining As Player2 or reconnection after disconnect
                     {
                         game.Player2 = player;
+                        game.GameStatus = Status.GAME_STARTED;
                         UpdateGame(game);
                         status = sendStartGameWakeupToSecondPlayer(game.Player1, game);
                     }

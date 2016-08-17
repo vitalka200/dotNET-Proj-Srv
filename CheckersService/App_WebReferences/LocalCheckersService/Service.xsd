@@ -320,6 +320,20 @@
       </xs:sequence>
     </xs:complexType>
   </xs:element>
+  <xs:element name="UpdateFamily">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q31="http://schemas.datacontract.org/2004/07/" minOccurs="0" name="family" nillable="true" type="q31:Family" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="UpdateFamilyResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element minOccurs="0" name="UpdateFamilyResult" type="xs:boolean" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
   <xs:element name="GetPlayersByFamily">
     <xs:complexType>
       <xs:sequence>
@@ -330,7 +344,7 @@
   <xs:element name="GetPlayersByFamilyResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q31="http://schemas.datacontract.org/2004/07/" minOccurs="0" name="GetPlayersByFamilyResult" nillable="true" type="q31:ArrayOfPlayer" />
+        <xs:element xmlns:q32="http://schemas.datacontract.org/2004/07/" minOccurs="0" name="GetPlayersByFamilyResult" nillable="true" type="q32:ArrayOfPlayer" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>
@@ -344,7 +358,7 @@
   <xs:element name="GetMovesByGameResponse">
     <xs:complexType>
       <xs:sequence>
-        <xs:element xmlns:q32="http://schemas.datacontract.org/2004/07/" minOccurs="0" name="GetMovesByGameResult" nillable="true" type="q32:ArrayOfMove" />
+        <xs:element xmlns:q33="http://schemas.datacontract.org/2004/07/" minOccurs="0" name="GetMovesByGameResult" nillable="true" type="q33:ArrayOfMove" />
       </xs:sequence>
     </xs:complexType>
   </xs:element>

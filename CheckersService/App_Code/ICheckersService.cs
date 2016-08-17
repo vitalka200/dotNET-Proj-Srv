@@ -26,7 +26,7 @@ public interface IRestCheckersService
     bool UpdatePlayer(Player player);
 
     [OperationContract]
-    [WebGet(UriTemplate = "/players/get?playerId={playerId}")]
+    [WebGet(UriTemplate = "/players/get?playerId={playerId}", ResponseFormat = WebMessageFormat.Json)]
     Player GetPlayerById(string playerId);
 
     [OperationContract]
@@ -55,7 +55,7 @@ public interface IRestCheckersService
     List<Game> GetGames();
 
     [OperationContract]
-    [WebGet(UriTemplate = "/games/get?gameId={gameId}")]
+    [WebGet(UriTemplate = "/games/get?gameId={gameId}", ResponseFormat = WebMessageFormat.Json)]
     Game GetGameById(string gameId);
 
     [OperationContract]
@@ -80,11 +80,15 @@ public interface IRestCheckersService
     Family GetFamily(string familyId);
 
     [OperationContract]
+    [WebInvoke(Method = "POST", UriTemplate = "/families/update", ResponseFormat = WebMessageFormat.Json)]
+    bool UpdateFamily(Family family);
+
+    [OperationContract]
     [WebGet(UriTemplate = "/families/byPlayer?playerId={familyId}", ResponseFormat = WebMessageFormat.Json)]
     List<Player> GetPlayersByFamily(string familyId);
 
     [OperationContract]
-    [WebGet(UriTemplate = "/moves/byGame?gameId={gameId}")]
+    [WebGet(UriTemplate = "/moves/byGame?gameId={gameId}", ResponseFormat = WebMessageFormat.Json)]
     List<Move> GetMovesByGame(string gameId);
 
 }
@@ -147,7 +151,11 @@ public enum Status {
     [EnumMember]
     GAME_WIN,
     [EnumMember]
+    NEW_GAME,
+    [EnumMember]
     GAME_STARTED,
+    [EnumMember]
+    GAME_COMPLETED,
     [EnumMember]
     NO_SUCH_GAME,
     [EnumMember]
@@ -224,6 +232,10 @@ public class Game
     public Player Player1 { get; set; }
     [DataMember]
     public Player Player2 { get; set; }
+    [DataMember]
+    public Status GameStatus { get; set; }
+    [DataMember]
+    public int WinnerPlayerNum { get; set; } 
 
 
     public override bool Equals(object obj)
@@ -243,17 +255,19 @@ public class Game
 
     public override string ToString()
     {
-        return string.Format("Id: {0}, Player1: {1}, Player2: {2}", Id, Player1, Player2);
+        return string.Format("Id: {0}, Player1: {1}, Player2: {2}, GameStatus: {3}", Id, Player1, Player2, GameStatus);
     }
 
     public static implicit operator Game(LocalCheckersService.Game v)
     {
         if (v == null) return null;
-        return new Game{
+        return new Game {
             CreatedDateTime = v.CreatedDateTime,
             Id = v.Id,
             Player1 = v.Player1,
-            Player2 = v.Player2
+            Player2 = v.Player2,
+            GameStatus = (Status)Enum.Parse(typeof(Status), v.GameStatus.ToString(), true),
+            WinnerPlayerNum = v.WinnerPlayerNum
         };
     }
 
@@ -264,7 +278,9 @@ public class Game
             CreatedDateTime = v.CreatedDateTime,
             Id = v.Id,
             Player1 = v.Player1,
-            Player2 = v.Player2
+            Player2 = v.Player2,
+            GameStatus = (LocalCheckersService.Status)Enum.Parse(typeof(LocalCheckersService.Status), v.GameStatus.ToString(), true),
+            WinnerPlayerNum = v.WinnerPlayerNum
         };
     }
 }

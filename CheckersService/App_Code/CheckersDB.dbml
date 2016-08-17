@@ -29,6 +29,8 @@
     <Type Name="TblGame">
       <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
       <Column Name="CreatedDate" Type="System.DateTime" DbType="Date NOT NULL" CanBeNull="false" />
+      <Column Name="Status" Type="System.String" DbType="VarChar(255) NOT NULL" CanBeNull="false" />
+      <Column Name="WinnerPlayerNum" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Association Name="TblGame_TblPlayerGame" Member="TblPlayerGames" ThisKey="Id" OtherKey="idGame" Type="TblPlayerGame" />
       <Association Name="TblGame_TblMove" Member="TblMoves" ThisKey="Id" OtherKey="idGame" Type="TblMove" />
     </Type>

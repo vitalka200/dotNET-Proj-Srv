@@ -9,6 +9,8 @@ GO
 CREATE TABLE [dbo].[TblGame] (
     [Id]          INT  IDENTITY (1, 1) NOT NULL,
     [CreatedDate] DATE NOT NULL,
+	[Status]      VARCHAR (255) DEFAULT ('NEW_GAME') NOT NULL,
+	[WinnerPlayerNum] INT DEFAULT(0) CHECK (WinnerPlayerNum > -1 AND WinnerPlayerNum <3) NOT NULL,
     PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 go

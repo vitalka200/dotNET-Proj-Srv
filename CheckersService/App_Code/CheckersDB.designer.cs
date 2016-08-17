@@ -636,6 +636,10 @@ public partial class TblGame : INotifyPropertyChanging, INotifyPropertyChanged
 	
 	private System.DateTime _CreatedDate;
 	
+	private string _Status;
+	
+	private int _WinnerPlayerNum;
+	
 	private EntitySet<TblPlayerGame> _TblPlayerGames;
 	
 	private EntitySet<TblMove> _TblMoves;
@@ -648,6 +652,10 @@ public partial class TblGame : INotifyPropertyChanging, INotifyPropertyChanged
     partial void OnIdChanged();
     partial void OnCreatedDateChanging(System.DateTime value);
     partial void OnCreatedDateChanged();
+    partial void OnStatusChanging(string value);
+    partial void OnStatusChanged();
+    partial void OnWinnerPlayerNumChanging(int value);
+    partial void OnWinnerPlayerNumChanged();
     #endregion
 	
 	public TblGame()
@@ -693,6 +701,46 @@ public partial class TblGame : INotifyPropertyChanging, INotifyPropertyChanged
 				this._CreatedDate = value;
 				this.SendPropertyChanged("CreatedDate");
 				this.OnCreatedDateChanged();
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Status", DbType="VarChar(255) NOT NULL", CanBeNull=false)]
+	public string Status
+	{
+		get
+		{
+			return this._Status;
+		}
+		set
+		{
+			if ((this._Status != value))
+			{
+				this.OnStatusChanging(value);
+				this.SendPropertyChanging();
+				this._Status = value;
+				this.SendPropertyChanged("Status");
+				this.OnStatusChanged();
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_WinnerPlayerNum", DbType="Int NOT NULL")]
+	public int WinnerPlayerNum
+	{
+		get
+		{
+			return this._WinnerPlayerNum;
+		}
+		set
+		{
+			if ((this._WinnerPlayerNum != value))
+			{
+				this.OnWinnerPlayerNumChanging(value);
+				this.SendPropertyChanging();
+				this._WinnerPlayerNum = value;
+				this.SendPropertyChanged("WinnerPlayerNum");
+				this.OnWinnerPlayerNumChanged();
 			}
 		}
 	}

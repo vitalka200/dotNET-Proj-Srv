@@ -21,12 +21,33 @@
   <xs:complexType name="Game">
     <xs:sequence>
       <xs:element minOccurs="0" name="CreatedDateTime" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="GameStatus" type="tns:Status" />
       <xs:element minOccurs="0" name="Id" type="xs:int" />
       <xs:element minOccurs="0" name="Player1" nillable="true" type="tns:Player" />
       <xs:element minOccurs="0" name="Player2" nillable="true" type="tns:Player" />
+      <xs:element minOccurs="0" name="WinnerPlayerNum" type="xs:int" />
     </xs:sequence>
   </xs:complexType>
   <xs:element name="Game" nillable="true" type="tns:Game" />
+  <xs:simpleType name="Status">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="MOVE_ACCEPTED" />
+      <xs:enumeration value="GAME_LOSE" />
+      <xs:enumeration value="GAME_WIN" />
+      <xs:enumeration value="NEW_GAME" />
+      <xs:enumeration value="GAME_STARTED" />
+      <xs:enumeration value="GAME_COMPLETED" />
+      <xs:enumeration value="NO_SUCH_GAME" />
+      <xs:enumeration value="WAITING_FOR_OTHER_PLAYER_TO_ARRIVE" />
+      <xs:enumeration value="NOT_ENOUGH_PLAYERS_TO_START_GAME" />
+      <xs:enumeration value="GAME_ALREADY_STARTED_BY_OTHER_PLAYERS" />
+      <xs:enumeration value="NOT_LOGGED_IN" />
+      <xs:enumeration value="NO_SUCH_USER" />
+      <xs:enumeration value="WRONG_INPUT" />
+      <xs:enumeration value="LOGIN_SUCCEDED" />
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:element name="Status" nillable="true" type="tns:Status" />
   <xs:complexType name="Player">
     <xs:sequence>
       <xs:element minOccurs="0" name="Family" nillable="true" type="tns:Family" />
@@ -49,23 +70,6 @@
     </xs:sequence>
   </xs:complexType>
   <xs:element name="ArrayOfMove" nillable="true" type="tns:ArrayOfMove" />
-  <xs:simpleType name="Status">
-    <xs:restriction base="xs:string">
-      <xs:enumeration value="MOVE_ACCEPTED" />
-      <xs:enumeration value="GAME_LOSE" />
-      <xs:enumeration value="GAME_WIN" />
-      <xs:enumeration value="GAME_STARTED" />
-      <xs:enumeration value="NO_SUCH_GAME" />
-      <xs:enumeration value="WAITING_FOR_OTHER_PLAYER_TO_ARRIVE" />
-      <xs:enumeration value="NOT_ENOUGH_PLAYERS_TO_START_GAME" />
-      <xs:enumeration value="GAME_ALREADY_STARTED_BY_OTHER_PLAYERS" />
-      <xs:enumeration value="NOT_LOGGED_IN" />
-      <xs:enumeration value="NO_SUCH_USER" />
-      <xs:enumeration value="WRONG_INPUT" />
-      <xs:enumeration value="LOGIN_SUCCEDED" />
-    </xs:restriction>
-  </xs:simpleType>
-  <xs:element name="Status" nillable="true" type="tns:Status" />
   <xs:complexType name="ArrayOfGame">
     <xs:sequence>
       <xs:element minOccurs="0" maxOccurs="unbounded" name="Game" nillable="true" type="tns:Game" />
