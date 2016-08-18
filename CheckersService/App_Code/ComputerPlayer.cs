@@ -1,6 +1,7 @@
 ﻿using LocalCheckersService;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Web;
@@ -17,7 +18,10 @@ namespace ComputerPlayer
         private const int MAX_ROWS = 8;
         private const int TOTAL_CHEKERS = 4;
         private LocalCheckersService.Coordinate INITIAL_POINT = new LocalCheckersService.Coordinate { X = -1, Y = -1 };
-
+        public int[,] CheckersLocations = new int[MAX_ROWS,MAX_COLLS];
+        public const int COMPUTER_PLAYER = 1;
+        public const int REAL_PLAYER = 2;
+        public Move LastMove { get; set; }
         public LocalCheckersService.DuplexCheckersServiceClient DuplexService { get; set; }
         public LocalCheckersService.SoapCheckersServiceClient SoapService { get; set; }
         public ComputerPlayerCheckerServiceHandler ServiceCallBackHandler { get; private set; }
@@ -32,6 +36,9 @@ namespace ComputerPlayer
 
         public ComputerPlayer()
         {
+            // Initial checkers locations
+            CheckersLocations[1,0] = COMPUTER_PLAYER; CheckersLocations[0,1] = COMPUTER_PLAYER; CheckersLocations[1,2] = COMPUTER_PLAYER; CheckersLocations[0,3] = COMPUTER_PLAYER; // Computer checkers
+            CheckersLocations[7,0] = REAL_PLAYER; CheckersLocations[6,1] = REAL_PLAYER; CheckersLocations[7,2] = REAL_PLAYER; CheckersLocations[6,3] = REAL_PLAYER; // Computer checkers
             ServiceCallBackHandler = new ComputerPlayerCheckerServiceHandler();
             ServiceCallBackHandler.ComputerPlayer = this;
             DuplexService = new DuplexCheckersServiceClient(new System.ServiceModel.InstanceContext(ServiceCallBackHandler));
@@ -60,8 +67,20 @@ namespace ComputerPlayer
             {
                 Coordinate to1 = new Coordinate { X = 0, Y = i};
                 Coordinate to2 = new Coordinate { X = i, Y = i};
-                initialMoves.Add(new Move { From = INITIAL_POINT, To = to1, PlayerId = ComputerPlayerDTO.Id, DateTime = DateTime.Now, GameId = ComputerGameDTO.Id});
-                initialMoves.Add(new Move { From = INITIAL_POINT, To = to2, PlayerId = ComputerPlayerDTO.Id, DateTime = DateTime.Now, GameId = ComputerGameDTO.Id });
+                initialMoves.Add(new Move {
+                    From = INITIAL_POINT,
+                    To = to1,
+                    PlayerId = ComputerPlayerDTO.Id,
+                    DateTime = DateTime.Now,
+                    GameId = ComputerGameDTO.Id
+                });
+                initialMoves.Add(new Move {
+                    From = INITIAL_POINT,
+                    To = to2,
+                    PlayerId = ComputerPlayerDTO.Id,
+                    DateTime = DateTime.Now,
+                    GameId = ComputerGameDTO.Id
+                });
             }
             return initialMoves.ToArray();
         }
@@ -74,44 +93,64 @@ namespace ComputerPlayer
 
         public void SendAdditionalMove()
         {
-            Move move = GeneratedMoves.Pop();
-            Console.WriteLine("Sending generated move. {0}", move);
-            DuplexService.MakeMove(move);
+            LastMove = GeneratedMoves.Pop();
+            Debug.WriteLine("Sending generated move. {0}", LastMove);
+            DuplexService.MakeMove(LastMove);
         }
 
-        public void GenerateMoves(Coordinate pointFrom)
+        public void GenerateMoves()
         {
-            for (int i = 1; i < 3; i++)
-            { 
-                GeneratedMoves.Push(new Move {
-                    GameId = ComputerGameDTO.Id,
-                    PlayerId = ComputerPlayerDTO.Id,
-                    DateTime = DateTime.Now,
-                    From = pointFrom,
-                    To = new Coordinate { X = pointFrom.X + i, Y = pointFrom.Y + i  }
-                });
-                GeneratedMoves.Push(new Move {
-                    GameId = ComputerGameDTO.Id,
-                    PlayerId = ComputerPlayerDTO.Id,
-                    DateTime = DateTime.Now,
-                    From = pointFrom,
-                    To = new Coordinate { X = pointFrom.X + i, Y = pointFrom.Y - i  }
-                });
-                GeneratedMoves.Push(new Move {
-                    GameId = ComputerGameDTO.Id,
-                    PlayerId = ComputerPlayerDTO.Id,
-                    DateTime = DateTime.Now,
-                    From = pointFrom,
-                    To = new Coordinate { X = pointFrom.X - i, Y = pointFrom.Y + i  }
-                });
-                GeneratedMoves.Push(new Move {
-                    GameId = ComputerGameDTO.Id,
-                    PlayerId = ComputerPlayerDTO.Id,
-                    DateTime = DateTime.Now,
-                    From = pointFrom,
-                    To = new Coordinate { X = pointFrom.X - i, Y = pointFrom.Y - i  }
-                });
+            Move move;
+            bool wasEaten;
+            for (int x = 0; x < CheckersLocations.GetLength(0); x++)
+            {
+                for (int y = 0; y < CheckersLocations.GetLength(1); y++)
+                {
+                    if (CheckersLocations[x,y] == COMPUTER_PLAYER)// Generate next move for checker
+                    {
+                        if (PointInBounds(x+1,y+1) && CheckersLocations[x+1,y+1] == REAL_PLAYER) // We'll eat player checker
+                        {
+                            move = new Move {
+                                GameId = ComputerGameDTO.Id,
+                                PlayerId = ComputerPlayerDTO.Id,
+                                DateTime = DateTime.Now,
+                                From = new Coordinate { X = x, Y = y},
+                                To = new Coordinate { X = x+2, Y = y+2}
+                            };
+                            if (MoveIsValid(ComputerPlayerDTO, ComputerGameDTO, move)) { GeneratedMoves.Push(move); };
+                        }
+                        if (PointInBounds(x,y-1) && CheckersLocations[x,y-1] == REAL_PLAYER) // We'll eat player checker
+                        {
+                            move = new Move {
+                                GameId = ComputerGameDTO.Id,
+                                PlayerId = ComputerPlayerDTO.Id,
+                                DateTime = DateTime.Now,
+                                From = new Coordinate { X =x, Y =y},
+                                To = new Coordinate { X = x+1, Y = y+1}
+                            };
+                            if (MoveIsValid(ComputerPlayerDTO, ComputerGameDTO, move)) { GeneratedMoves.Push(move); };
+                        }
+                        if (PointInBounds(x+1,y+1) && CheckersLocations[x+1,y+1] == 0)
+                        {
+                            move = new Move {
+                                GameId = ComputerGameDTO.Id,
+                                PlayerId = ComputerPlayerDTO.Id,
+                                DateTime = DateTime.Now,
+                                From = new Coordinate { X = x, Y = y},
+                                To = new Coordinate { X = x+1, Y = y+1}
+                            };
+                            if (MoveIsValid(ComputerPlayerDTO, ComputerGameDTO, move)) { GeneratedMoves.Push(move); };
+                        }
+                    }
+                }
             }
+        }
+
+        private bool PointInBounds(int x, int y)
+        {
+            if (x > MAX_ROWS-1 || x < 0) return false;
+            if (y > MAX_COLLS-1 || y < 0) return false;
+            return true;
         }
 
         private void GenerateMoreMoves()
@@ -119,10 +158,22 @@ namespace ComputerPlayer
             GeneratedMoves.Clear();
 
             List<LocalCheckersService.Move> allMoves = SoapService.RecoverGameMovesByPlayer(ComputerGameDTO, ComputerPlayerDTO).ToList();
-            foreach (var move in allMoves)
-            {
-                GenerateMoves(move.To);
-            }
+            GenerateMoves();
+        }
+        private bool MoveIsValid(Player player, Game game, Move move)
+        {
+            Coordinate from = move.From;
+            Coordinate to = move.To;
+            Player player2 = game.Player1.Equals(player) ? game.Player2 : game.Player1;
+
+            if (to.X > MAX_ROWS - 1 || to.X < 0 || to.Y > MAX_COLLS - 1 || to.Y < 0) return false;
+            Coordinate delta = new Coordinate { X = to.X - from.X, Y = Math.Abs(to.Y - from.Y) };
+
+            if (delta.X < 0 && game.Player2.Equals(player)) return false; // we black and going back. that not allowed
+            if (delta.X > 0 && game.Player1.Equals(player)) return false; // we white and going back. that not allowed
+
+            if (delta.X > 2 || delta.Y > 2) return false; // Too long jump
+            return true;
         }
 
     }
@@ -135,42 +186,44 @@ namespace ComputerPlayer
         public void GameEnd(LocalCheckersService.Move lastRivalMove, LocalCheckersService.Status status)
         {
             ComputerPlayer.GameIsRunning = false;
-            Console.WriteLine("Game Was ended. My Status: {0}", status.ToString());
+            Debug.WriteLine("Game Was ended. My Status: {0}", status.ToString());
         }
 
         public void LoginCallback(LocalCheckersService.Player player, LocalCheckersService.Game[] playerGames, LocalCheckersService.Status status)
         {
             ComputerPlayer.ComputerPlayerDTO = player;
-            Console.WriteLine("Computer player : {0} logedIn. status: {1}", (Player)player, status.ToString());
-        }
-
-        private void GetLast4Moves()
-        {
-            List<LocalCheckersService.Move> lastMoves = ComputerPlayer.SoapService.RecoverGameMovesByPlayer(ComputerPlayer.ComputerGameDTO, ComputerPlayer.ComputerPlayerDTO).ToList();
-            List<LocalCheckersService.Move> last4Moves = lastMoves.GetRange(lastMoves.Count - 4, 4);
+            Debug.WriteLine("Computer player : {0} logedIn. status: {1}", (Player)player, status.ToString());
         }
 
         public void MakeMoveCallback(LocalCheckersService.Status status)
         {
-            while (LocalCheckersService.Status.MOVE_ACCEPTED != status)
+            while (LocalCheckersService.Status.MOVE_ACCEPTED != status && 
+                LocalCheckersService.Status.GAME_LOSE != status && 
+                LocalCheckersService.Status.GAME_WIN != status)
             {
-                Console.WriteLine("Move wasn't accepted. Sending new one.");
+                Debug.WriteLine("Move wasn't accepted. Sending new one.");
                 ComputerPlayer.SendAdditionalMove();
 
+            } if (LocalCheckersService.Status.MOVE_ACCEPTED == status)
+            {
+                ComputerPlayer.CheckersLocations[ComputerPlayer.LastMove.To.X, ComputerPlayer.LastMove.To.Y] = ComputerPlayer.COMPUTER_PLAYER;
+                ComputerPlayer.CheckersLocations[ComputerPlayer.LastMove.From.X, ComputerPlayer.LastMove.From.Y] = 0;
             }
-            Console.WriteLine("ComputerMove status: {0}", status.ToString());
+            Debug.WriteLine("ComputerMove status: " + status.ToString());
         }
 
         public void PlayerTurnCallback(LocalCheckersService.Move lastRivalMove)
         {
-            Console.WriteLine("Computer Player got turn. Last rival move: {0}", (Move)lastRivalMove);
+            Debug.WriteLine("Computer Player got turn. Last rival move: {0}", (Move)lastRivalMove);
+            ComputerPlayer.CheckersLocations[lastRivalMove.To.X, lastRivalMove.To.Y] = ComputerPlayer.REAL_PLAYER;
+            ComputerPlayer.CheckersLocations[lastRivalMove.From.X, lastRivalMove.From.Y] = 0;
             ComputerPlayer.MakeMove();
         }
 
         public void StartGameCallback(LocalCheckersService.Game game, LocalCheckersService.Status status)
         {
             ComputerPlayer.GameIsRunning = true;
-            Console.WriteLine("Game: {0}. status: {1}", (Game)game, status.ToString());
+            Debug.WriteLine("Game: {0}. status: {1}", (Game)game, status.ToString());
         }
     }
 

@@ -681,7 +681,7 @@
       <wsa10:EndpointReference>
         <wsa10:Address>http://localhost:52958/Service.svc/client</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-          <Upn>DEVELOP-PC\vitalka200</Upn>
+          <Upn>vitalik@cellebrite.local</Upn>
         </Identity>
       </wsa10:EndpointReference>
     </wsdl:port>

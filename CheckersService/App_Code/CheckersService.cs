@@ -37,7 +37,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
     public Game CreateNewGame(Game game)
     {
         CheckersDBDataContext db = new CheckersDBDataContext();
-        TblGame gameToSave = new TblGame { CreatedDate = game.CreatedDateTime };
+        TblGame gameToSave = new TblGame { CreatedDate = game.CreatedDateTime , Status = Status.NEW_GAME.ToString()};
         db.TblGames.InsertOnSubmit(gameToSave);
         db.SubmitChanges();
 
@@ -100,7 +100,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 }
             }
         }
-        catch (Exception e) {  /* If we have any exception we just return false*/}
+        catch (Exception) {  /* If we have any exception we just return false*/}
         return false;
     }
 
@@ -276,7 +276,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             }
 
         }
-        catch (Exception e) { /* If we have any exception we just return false*/}
+        catch (Exception) { /* If we have any exception we just return false*/}
         return false;
     }
 
@@ -313,7 +313,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
             db.SubmitChanges();
         }
-        catch (Exception e) {  /* If we have any exception we just return false*/}
+        catch (Exception) {  /* If we have any exception we just return false*/}
         return false;
     }
 
@@ -379,7 +379,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 return true;
             }
         }
-        catch (Exception e) {  /* If we have any exception we just return false*/ }
+        catch (Exception) {  /* If we have any exception we just return false*/ }
         return false;
     }
 
@@ -415,7 +415,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 return true;
             }
         }
-        catch (Exception e) {  /* If we have any exception we just return false*/}
+        catch (Exception) {  /* If we have any exception we just return false*/}
         return false;
     }
 
@@ -471,15 +471,11 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         IDuplexCheckersServiceCallback storedCallback = null;
         Status status = Status.WRONG_INPUT;
 
-        if (lookupPlayer2Callback.TryGetValue(player, out storedCallback))
-        {    
-            status = StoreMove(move, player);
-        }
-        else
-        {
-            status = Status.NOT_LOGGED_IN;
-        }
-        sessionCallback.MakeMoveCallback(status);
+        if (lookupPlayer2Callback.TryGetValue(player, out storedCallback)) { status = StoreMove(move, player);  }
+        else { status = Status.NOT_LOGGED_IN; }
+
+        if (Status.GAME_WIN == status || Status.GAME_LOSE == status) { sessionCallback.GameEnd(move, status); }
+        else { sessionCallback.MakeMoveCallback(status); }
 
     }
 
@@ -533,7 +529,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 UpdateGame(game);
                 lookupPlayer2Callback[player2].GameEnd(move, Status.GAME_WIN);
             }
-        } catch (Exception e) { }
+        } catch (Exception) { }
 
         return status;
     }
@@ -566,7 +562,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         return eatMoves.Count();
     }
 
-    private bool MoveIsValid(Player player, Game game, Move move, out bool wasEaten)
+    public bool MoveIsValid(Player player, Game game, Move move, out bool wasEaten)
     {
         Coordinate from = move.From;
         Coordinate to = move.To;
@@ -655,7 +651,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 var tblPlayer = db.TblPlayers.SingleOrDefault(p => p.Name == name && p.Password == password);
                 player = GetPlayerById(tblPlayer.Id.ToString());
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 status = Status.NO_SUCH_USER;
             }
@@ -683,7 +679,9 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         if (computerRival)
         {
             ComputerPlayer.ComputerPlayer computerPlayer = new ComputerPlayer.ComputerPlayer();
-            game = CreateNewGame(new Game { Player1 = game.Player1, Player2 = GetPlayerById(COMPUTER_USER_ID.ToString()), CreatedDateTime = game.CreatedDateTime });
+            Player ComputerPlayerDTO = GetPlayerById(COMPUTER_USER_ID.ToString());
+            game = CreateNewGame(new Game { Player1 = game.Player1, Player2 = ComputerPlayerDTO, CreatedDateTime = game.CreatedDateTime });
+            computerPlayer.ComputerPlayerDTO = ComputerPlayerDTO;
             computerPlayer.StartGameWithComputerPlayer(game);
 
             Thread computerPlayerThread = new Thread(new ParameterizedThreadStart((_) => {
@@ -730,7 +728,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                     status = Status.NO_SUCH_GAME;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 status = Status.WRONG_INPUT;
             }
@@ -750,7 +748,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 cb.StartGameCallback(game, status);
             }
         }
-        catch (Exception e) { }
+        catch (Exception) { }
         return status;
     }
 
