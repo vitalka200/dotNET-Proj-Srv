@@ -32,7 +32,17 @@
       <Column Name="Status" Type="System.String" DbType="VarChar(255) NOT NULL" CanBeNull="false" />
       <Column Name="WinnerPlayerNum" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Association Name="TblGame_TblPlayerGame" Member="TblPlayerGames" ThisKey="Id" OtherKey="idGame" Type="TblPlayerGame" />
+      <Association Name="TblGame_TblGameMove" Member="TblGameMoves" ThisKey="Id" OtherKey="idGame" Type="TblGameMove" />
       <Association Name="TblGame_TblMove" Member="TblMoves" ThisKey="Id" OtherKey="idGame" Type="TblMove" />
+    </Type>
+  </Table>
+  <Table Name="dbo.TblGameMove" Member="TblGameMoves">
+    <Type Name="TblGameMove">
+      <Column Name="Id" Type="System.Int32" DbType="Int NOT NULL IDENTITY" IsPrimaryKey="true" IsDbGenerated="true" CanBeNull="false" />
+      <Column Name="idMove" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Column Name="idGame" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
+      <Association Name="TblGame_TblGameMove" Member="TblGame" ThisKey="idGame" OtherKey="Id" Type="TblGame" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
+      <Association Name="TblMove_TblGameMove" Member="TblMove" ThisKey="idMove" OtherKey="Id" Type="TblMove" IsForeignKey="true" />
     </Type>
   </Table>
   <Table Name="dbo.TblMove" Member="TblMoves">
@@ -46,6 +56,7 @@
       <Column Name="To_X" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="To_Y" Type="System.Int32" DbType="Int NOT NULL" CanBeNull="false" />
       <Column Name="RivalEat" Type="System.Boolean" DbType="Bit NOT NULL" CanBeNull="false" />
+      <Association Name="TblMove_TblGameMove" Member="TblGameMoves" ThisKey="Id" OtherKey="idMove" Type="TblGameMove" />
       <Association Name="TblGame_TblMove" Member="TblGame" ThisKey="idGame" OtherKey="Id" Type="TblGame" IsForeignKey="true" DeleteRule="CASCADE" DeleteOnNull="true" />
       <Association Name="TblPlayer_TblMove" Member="TblPlayer" ThisKey="idPlayer" OtherKey="Id" Type="TblPlayer" IsForeignKey="true" />
     </Type>

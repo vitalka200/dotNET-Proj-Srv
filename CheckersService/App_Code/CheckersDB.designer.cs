@@ -41,6 +41,9 @@ public partial class CheckersDBDataContext : System.Data.Linq.DataContext
   partial void InsertTblGame(TblGame instance);
   partial void UpdateTblGame(TblGame instance);
   partial void DeleteTblGame(TblGame instance);
+  partial void InsertTblGameMove(TblGameMove instance);
+  partial void UpdateTblGameMove(TblGameMove instance);
+  partial void DeleteTblGameMove(TblGameMove instance);
   partial void InsertTblMove(TblMove instance);
   partial void UpdateTblMove(TblMove instance);
   partial void DeleteTblMove(TblMove instance);
@@ -108,6 +111,14 @@ public partial class CheckersDBDataContext : System.Data.Linq.DataContext
 		get
 		{
 			return this.GetTable<TblGame>();
+		}
+	}
+	
+	public System.Data.Linq.Table<TblGameMove> TblGameMoves
+	{
+		get
+		{
+			return this.GetTable<TblGameMove>();
 		}
 	}
 	
@@ -642,6 +653,8 @@ public partial class TblGame : INotifyPropertyChanging, INotifyPropertyChanged
 	
 	private EntitySet<TblPlayerGame> _TblPlayerGames;
 	
+	private EntitySet<TblGameMove> _TblGameMoves;
+	
 	private EntitySet<TblMove> _TblMoves;
 	
     #region Extensibility Method Definitions
@@ -661,6 +674,7 @@ public partial class TblGame : INotifyPropertyChanging, INotifyPropertyChanged
 	public TblGame()
 	{
 		this._TblPlayerGames = new EntitySet<TblPlayerGame>(new Action<TblPlayerGame>(this.attach_TblPlayerGames), new Action<TblPlayerGame>(this.detach_TblPlayerGames));
+		this._TblGameMoves = new EntitySet<TblGameMove>(new Action<TblGameMove>(this.attach_TblGameMoves), new Action<TblGameMove>(this.detach_TblGameMoves));
 		this._TblMoves = new EntitySet<TblMove>(new Action<TblMove>(this.attach_TblMoves), new Action<TblMove>(this.detach_TblMoves));
 		OnCreated();
 	}
@@ -758,6 +772,19 @@ public partial class TblGame : INotifyPropertyChanging, INotifyPropertyChanged
 		}
 	}
 	
+	[global::System.Data.Linq.Mapping.AssociationAttribute(Name="TblGame_TblGameMove", Storage="_TblGameMoves", ThisKey="Id", OtherKey="idGame")]
+	public EntitySet<TblGameMove> TblGameMoves
+	{
+		get
+		{
+			return this._TblGameMoves;
+		}
+		set
+		{
+			this._TblGameMoves.Assign(value);
+		}
+	}
+	
 	[global::System.Data.Linq.Mapping.AssociationAttribute(Name="TblGame_TblMove", Storage="_TblMoves", ThisKey="Id", OtherKey="idGame")]
 	public EntitySet<TblMove> TblMoves
 	{
@@ -803,6 +830,18 @@ public partial class TblGame : INotifyPropertyChanging, INotifyPropertyChanged
 		entity.TblGame = null;
 	}
 	
+	private void attach_TblGameMoves(TblGameMove entity)
+	{
+		this.SendPropertyChanging();
+		entity.TblGame = this;
+	}
+	
+	private void detach_TblGameMoves(TblGameMove entity)
+	{
+		this.SendPropertyChanging();
+		entity.TblGame = null;
+	}
+	
 	private void attach_TblMoves(TblMove entity)
 	{
 		this.SendPropertyChanging();
@@ -813,6 +852,198 @@ public partial class TblGame : INotifyPropertyChanging, INotifyPropertyChanged
 	{
 		this.SendPropertyChanging();
 		entity.TblGame = null;
+	}
+}
+
+[global::System.Data.Linq.Mapping.TableAttribute(Name="dbo.TblGameMove")]
+public partial class TblGameMove : INotifyPropertyChanging, INotifyPropertyChanged
+{
+	
+	private static PropertyChangingEventArgs emptyChangingEventArgs = new PropertyChangingEventArgs(String.Empty);
+	
+	private int _Id;
+	
+	private int _idMove;
+	
+	private int _idGame;
+	
+	private EntityRef<TblGame> _TblGame;
+	
+	private EntityRef<TblMove> _TblMove;
+	
+    #region Extensibility Method Definitions
+    partial void OnLoaded();
+    partial void OnValidate(System.Data.Linq.ChangeAction action);
+    partial void OnCreated();
+    partial void OnIdChanging(int value);
+    partial void OnIdChanged();
+    partial void OnidMoveChanging(int value);
+    partial void OnidMoveChanged();
+    partial void OnidGameChanging(int value);
+    partial void OnidGameChanged();
+    #endregion
+	
+	public TblGameMove()
+	{
+		this._TblGame = default(EntityRef<TblGame>);
+		this._TblMove = default(EntityRef<TblMove>);
+		OnCreated();
+	}
+	
+	[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_Id", AutoSync=AutoSync.OnInsert, DbType="Int NOT NULL IDENTITY", IsPrimaryKey=true, IsDbGenerated=true)]
+	public int Id
+	{
+		get
+		{
+			return this._Id;
+		}
+		set
+		{
+			if ((this._Id != value))
+			{
+				this.OnIdChanging(value);
+				this.SendPropertyChanging();
+				this._Id = value;
+				this.SendPropertyChanged("Id");
+				this.OnIdChanged();
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_idMove", DbType="Int NOT NULL")]
+	public int idMove
+	{
+		get
+		{
+			return this._idMove;
+		}
+		set
+		{
+			if ((this._idMove != value))
+			{
+				if (this._TblMove.HasLoadedOrAssignedValue)
+				{
+					throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+				}
+				this.OnidMoveChanging(value);
+				this.SendPropertyChanging();
+				this._idMove = value;
+				this.SendPropertyChanged("idMove");
+				this.OnidMoveChanged();
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_idGame", DbType="Int NOT NULL")]
+	public int idGame
+	{
+		get
+		{
+			return this._idGame;
+		}
+		set
+		{
+			if ((this._idGame != value))
+			{
+				if (this._TblGame.HasLoadedOrAssignedValue)
+				{
+					throw new System.Data.Linq.ForeignKeyReferenceAlreadyHasValueException();
+				}
+				this.OnidGameChanging(value);
+				this.SendPropertyChanging();
+				this._idGame = value;
+				this.SendPropertyChanged("idGame");
+				this.OnidGameChanged();
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.AssociationAttribute(Name="TblGame_TblGameMove", Storage="_TblGame", ThisKey="idGame", OtherKey="Id", IsForeignKey=true, DeleteOnNull=true, DeleteRule="CASCADE")]
+	public TblGame TblGame
+	{
+		get
+		{
+			return this._TblGame.Entity;
+		}
+		set
+		{
+			TblGame previousValue = this._TblGame.Entity;
+			if (((previousValue != value) 
+						|| (this._TblGame.HasLoadedOrAssignedValue == false)))
+			{
+				this.SendPropertyChanging();
+				if ((previousValue != null))
+				{
+					this._TblGame.Entity = null;
+					previousValue.TblGameMoves.Remove(this);
+				}
+				this._TblGame.Entity = value;
+				if ((value != null))
+				{
+					value.TblGameMoves.Add(this);
+					this._idGame = value.Id;
+				}
+				else
+				{
+					this._idGame = default(int);
+				}
+				this.SendPropertyChanged("TblGame");
+			}
+		}
+	}
+	
+	[global::System.Data.Linq.Mapping.AssociationAttribute(Name="TblMove_TblGameMove", Storage="_TblMove", ThisKey="idMove", OtherKey="Id", IsForeignKey=true)]
+	public TblMove TblMove
+	{
+		get
+		{
+			return this._TblMove.Entity;
+		}
+		set
+		{
+			TblMove previousValue = this._TblMove.Entity;
+			if (((previousValue != value) 
+						|| (this._TblMove.HasLoadedOrAssignedValue == false)))
+			{
+				this.SendPropertyChanging();
+				if ((previousValue != null))
+				{
+					this._TblMove.Entity = null;
+					previousValue.TblGameMoves.Remove(this);
+				}
+				this._TblMove.Entity = value;
+				if ((value != null))
+				{
+					value.TblGameMoves.Add(this);
+					this._idMove = value.Id;
+				}
+				else
+				{
+					this._idMove = default(int);
+				}
+				this.SendPropertyChanged("TblMove");
+			}
+		}
+	}
+	
+	public event PropertyChangingEventHandler PropertyChanging;
+	
+	public event PropertyChangedEventHandler PropertyChanged;
+	
+	protected virtual void SendPropertyChanging()
+	{
+		if ((this.PropertyChanging != null))
+		{
+			this.PropertyChanging(this, emptyChangingEventArgs);
+		}
+	}
+	
+	protected virtual void SendPropertyChanged(String propertyName)
+	{
+		if ((this.PropertyChanged != null))
+		{
+			this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+		}
 	}
 }
 
@@ -839,6 +1070,8 @@ public partial class TblMove : INotifyPropertyChanging, INotifyPropertyChanged
 	private int _To_Y;
 	
 	private bool _RivalEat;
+	
+	private EntitySet<TblGameMove> _TblGameMoves;
 	
 	private EntityRef<TblGame> _TblGame;
 	
@@ -870,6 +1103,7 @@ public partial class TblMove : INotifyPropertyChanging, INotifyPropertyChanged
 	
 	public TblMove()
 	{
+		this._TblGameMoves = new EntitySet<TblGameMove>(new Action<TblGameMove>(this.attach_TblGameMoves), new Action<TblGameMove>(this.detach_TblGameMoves));
 		this._TblGame = default(EntityRef<TblGame>);
 		this._TblPlayer = default(EntityRef<TblPlayer>);
 		OnCreated();
@@ -1063,6 +1297,19 @@ public partial class TblMove : INotifyPropertyChanging, INotifyPropertyChanged
 		}
 	}
 	
+	[global::System.Data.Linq.Mapping.AssociationAttribute(Name="TblMove_TblGameMove", Storage="_TblGameMoves", ThisKey="Id", OtherKey="idMove")]
+	public EntitySet<TblGameMove> TblGameMoves
+	{
+		get
+		{
+			return this._TblGameMoves;
+		}
+		set
+		{
+			this._TblGameMoves.Assign(value);
+		}
+	}
+	
 	[global::System.Data.Linq.Mapping.AssociationAttribute(Name="TblGame_TblMove", Storage="_TblGame", ThisKey="idGame", OtherKey="Id", IsForeignKey=true, DeleteOnNull=true, DeleteRule="CASCADE")]
 	public TblGame TblGame
 	{
@@ -1149,6 +1396,18 @@ public partial class TblMove : INotifyPropertyChanging, INotifyPropertyChanged
 		{
 			this.PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
 		}
+	}
+	
+	private void attach_TblGameMoves(TblGameMove entity)
+	{
+		this.SendPropertyChanging();
+		entity.TblMove = this;
+	}
+	
+	private void detach_TblGameMoves(TblGameMove entity)
+	{
+		this.SendPropertyChanging();
+		entity.TblMove = null;
 	}
 }
 

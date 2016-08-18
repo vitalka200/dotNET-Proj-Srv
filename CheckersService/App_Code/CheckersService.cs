@@ -252,7 +252,6 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             if (!gameFromDb.Status.Equals(game.GameStatus))// Changed game status
             {
                 gameFromDb.Status = game.GameStatus.ToString();
-                needToSave = true;
             }
 
             if (gamesMetaInfo.Count() > 1)
@@ -261,16 +260,14 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 TblPlayerGame gameMetaInfo1 = gamesMetaInfo.ElementAt(1);
                 gameMetaInfo0.idPlayer = game.Player1.Id;
                 gameMetaInfo1.idPlayer = game.Player2.Id;
-                needToSave = true;
             }
             if (gamesMetaInfo.Count() > 0)
             {
                 TblPlayerGame gameMetaInfo0 = gamesMetaInfo.ElementAt(0);
                 gameMetaInfo0.idPlayer = game.Player1.Id;
                 TblPlayerGame gameMetaInfo1 = new TblPlayerGame { idGame = game.Id, idPlayer = game.Player2.Id };
-                needToSave = true;
             }
-            if (needToSave) { db.SubmitChanges(); }
+            db.SubmitChanges();
 
         }
         catch (Exception) { /* If we have any exception we just return false*/}
