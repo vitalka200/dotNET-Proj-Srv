@@ -14,15 +14,20 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
     private const int MAX_ROWS = 8;
     private const int TOTAL_CHEKERS = 4;
     private const int COMPUTER_USER_ID = 5;
+    private Player ComputerPlayer { get; set; }
+
     private const int NO_WINNER = 0;
     private const int FIRST_WON = 1;
     private const int SECOND_WON = 2;
     private Coordinate INITIAL_POINT = new Coordinate { X = -1, Y = -1};
 
-    private Dictionary<Player, IDuplexCheckersServiceCallback> lookupPlayer2Callback = new Dictionary<Player, IDuplexCheckersServiceCallback>();
+    private Dictionary<int, IDuplexCheckersServiceCallback> lookupPlayer2Callback = new Dictionary<int, IDuplexCheckersServiceCallback>();
     private Dictionary<IDuplexCheckersServiceCallback, Player> lookupCallback2Player = new Dictionary<IDuplexCheckersServiceCallback, Player>();
 
-
+    public CheckersService()
+    {
+        ComputerPlayer = GetPlayerById(COMPUTER_USER_ID.ToString());
+    }
 
     public bool AddGame(Game game)
     {
@@ -133,9 +138,8 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
         var result =
             from g in games
-            where !g.GameStatus.Equals(Status.GAME_COMPLETED) && // we need games that not completed for client
-                    // And we don't want to show computer games
-                    !((g.Player1 != null && g.Player1.Id == COMPUTER_USER_ID) || (g.Player2 != null && g.Player2.Id == COMPUTER_USER_ID))
+            where // We don't want to show computer games
+                    !ComputerPlayer.Equals(g.Player1) && !ComputerPlayer.Equals(g.Player2)
             select g;
 
         return result.ToList();
@@ -167,12 +171,11 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
         var result =
             from g in games
-            where !g.GameStatus.Equals(Status.GAME_COMPLETED) && // we need games that not completed for client
-                    // And we don't want to show computer games
-                    !((g.Player1 != null && g.Player1.Id == COMPUTER_USER_ID) || (g.Player2 != null && g.Player2.Id == COMPUTER_USER_ID))
+            where // We don't want to show computer games
+                    !ComputerPlayer.Equals(g.Player1) && !ComputerPlayer.Equals(g.Player2)
             select g;
 
-        return games.ToList();
+        return result.ToList();
     }
 
     public List<Player> GetPlayersByGame(string gameId)
@@ -471,7 +474,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         IDuplexCheckersServiceCallback storedCallback = null;
         Status status = Status.WRONG_INPUT;
 
-        if (lookupPlayer2Callback.TryGetValue(player, out storedCallback)) { status = StoreMove(move, player);  }
+        if (lookupPlayer2Callback.TryGetValue(player.Id, out storedCallback)) { status = StoreMove(move, player);  }
         else { status = Status.NOT_LOGGED_IN; }
 
         if (Status.GAME_WIN == status || Status.GAME_LOSE == status) { sessionCallback.GameEnd(move, status); }
@@ -511,7 +514,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 db.TblMoves.InsertOnSubmit(tblMove);
                 db.SubmitChanges();
 
-                lookupPlayer2Callback[player2].PlayerTurnCallback(move);
+                lookupPlayer2Callback[player2.Id].PlayerTurnCallback(move);
             }
             if (isMoveValid && reachedEnd)//If reached end, game won
             {
@@ -519,7 +522,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 game.GameStatus = Status.GAME_COMPLETED;
                 game.WinnerPlayerNum = game.Player1.Equals(player) ? 1 : 2; // Player 1 won the game
                 UpdateGame(game);
-                lookupPlayer2Callback[player2].GameEnd(move, Status.GAME_LOSE);
+                lookupPlayer2Callback[player2.Id].GameEnd(move, Status.GAME_LOSE);
             }
             else if (isMoveValid && wasEaten && noMoreRivalChekers)
             {
@@ -527,7 +530,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 game.GameStatus = Status.GAME_COMPLETED;
                 game.WinnerPlayerNum = game.Player1.Equals(player) ? 2 : 1; // Player 2 won the game
                 UpdateGame(game);
-                lookupPlayer2Callback[player2].GameEnd(move, Status.GAME_WIN);
+                lookupPlayer2Callback[player2.Id].GameEnd(move, Status.GAME_WIN);
             }
         } catch (Exception) { }
 
@@ -617,17 +620,17 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         if (Status.LOGIN_SUCCEDED == status)
         {
             // Cleanup old callbacks
-            if (lookupPlayer2Callback.ContainsKey(player))
+            if (lookupPlayer2Callback.ContainsKey(player.Id))
             {
-                var callBack = lookupPlayer2Callback[player];
+                var callBack = lookupPlayer2Callback[player.Id];
                 if (lookupCallback2Player.ContainsKey(callBack))
                 {
-                    lookupCallback2Player.Remove(lookupPlayer2Callback[player]);
+                    lookupCallback2Player.Remove(lookupPlayer2Callback[player.Id]);
                 }
-                lookupPlayer2Callback.Remove(player);
+                lookupPlayer2Callback.Remove(player.Id);
             }
             lookupCallback2Player.Add(cb, player);
-            lookupPlayer2Callback.Add(player, cb);
+            lookupPlayer2Callback.Add(player.Id, cb);
             gameList = GetGamesByPlayer(player);
         }
 
@@ -678,14 +681,13 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
         if (computerRival)
         {
-            ComputerPlayer.ComputerPlayer computerPlayer = new ComputerPlayer.ComputerPlayer();
-            Player ComputerPlayerDTO = GetPlayerById(COMPUTER_USER_ID.ToString());
-            game = CreateNewGame(new Game { Player1 = game.Player1, Player2 = ComputerPlayerDTO, CreatedDateTime = game.CreatedDateTime });
-            computerPlayer.ComputerPlayerDTO = ComputerPlayerDTO;
-            computerPlayer.StartGameWithComputerPlayer(game);
+            ComputerPlayer.ComputerPlayerImpl PlayerImpl = new ComputerPlayer.ComputerPlayerImpl();
+            game = CreateNewGame(new Game { Player1 = game.Player1, Player2 = ComputerPlayer, CreatedDateTime = game.CreatedDateTime });
+            PlayerImpl.ComputerPlayerDTO = ComputerPlayer;
+            PlayerImpl.StartGameWithComputerPlayer(game);
 
             Thread computerPlayerThread = new Thread(new ParameterizedThreadStart((_) => {
-                while (computerPlayer.GameIsRunning)
+                while (PlayerImpl.GameIsRunning)
                 {
                     Thread.Sleep(1000);
                 };
@@ -706,15 +708,11 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                     if ((player.Equals(game.Player1) || game.Player1 == null) && game.Player2 != null) //Joining as Player1 or reconecting after a disctonnect
                     {
                         game.Player1 = player;
-                        game.GameStatus = Status.GAME_STARTED;
-                        UpdateGame(game);
                         status = sendStartGameWakeupToSecondPlayer(game.Player2, game);
                     }
                     else if ((player.Equals(game.Player2) || game.Player2 == null) && game.Player1 != null) // Joining As Player2 or reconnection after disconnect
                     {
                         game.Player2 = player;
-                        game.GameStatus = Status.GAME_STARTED;
-                        UpdateGame(game);
                         status = sendStartGameWakeupToSecondPlayer(game.Player1, game);
                     }
                     else
@@ -733,6 +731,11 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 status = Status.WRONG_INPUT;
             }
         }
+        if (Status.GAME_STARTED == status)
+        {
+            game.GameStatus = Status.GAME_STARTED;
+            UpdateGame(game);
+        }
         cb.StartGameCallback(game, status);
     }
 
@@ -742,7 +745,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         try
         {
             IDuplexCheckersServiceCallback cb = null;
-            if (lookupPlayer2Callback.TryGetValue(player, out cb))
+            if (lookupPlayer2Callback.TryGetValue(player.Id, out cb))
             {
                 status = Status.GAME_STARTED;
                 cb.StartGameCallback(game, status);
@@ -780,7 +783,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             if (game.Player1.Equals(player)) // Send client to start game if it's Player1 (Black)
             {
                 Move move = GetMovesByGame(game.Id.ToString()).Last();
-                lookupPlayer2Callback[player].PlayerTurnCallback(move);
+                lookupPlayer2Callback[player.Id].PlayerTurnCallback(move);
             }
         }
     }

@@ -11,7 +11,7 @@ namespace ComputerPlayer
     /// <summary>
     /// Summary description for ComputerPlayer
     /// </summary>
-    public class ComputerPlayer
+    public class ComputerPlayerImpl
     {
 
         private const int MAX_COLLS = 4;
@@ -25,7 +25,7 @@ namespace ComputerPlayer
         public LocalCheckersService.DuplexCheckersServiceClient DuplexService { get; set; }
         public LocalCheckersService.SoapCheckersServiceClient SoapService { get; set; }
         public ComputerPlayerCheckerServiceHandler ServiceCallBackHandler { get; private set; }
-        private const string COMPUTER_PLAYER_USERNAME = "ComputerPlayer";
+        private const string COMPUTER_PLAYER_USERNAME = "Computer";
         private const string COMPUTER_PLAYER_PASSWORD = "password";
         public Player ComputerPlayerDTO { get; set; }
         public Game ComputerGameDTO { get; set; }
@@ -34,13 +34,13 @@ namespace ComputerPlayer
         public Stack<Move> GeneratedMoves { get; private set; }
 
 
-        public ComputerPlayer()
+        public ComputerPlayerImpl()
         {
             // Initial checkers locations
             CheckersLocations[1,0] = COMPUTER_PLAYER; CheckersLocations[0,1] = COMPUTER_PLAYER; CheckersLocations[1,2] = COMPUTER_PLAYER; CheckersLocations[0,3] = COMPUTER_PLAYER; // Computer checkers
             CheckersLocations[7,0] = REAL_PLAYER; CheckersLocations[6,1] = REAL_PLAYER; CheckersLocations[7,2] = REAL_PLAYER; CheckersLocations[6,3] = REAL_PLAYER; // Computer checkers
             ServiceCallBackHandler = new ComputerPlayerCheckerServiceHandler();
-            ServiceCallBackHandler.ComputerPlayer = this;
+            ServiceCallBackHandler.PlayerImpl = this;
             DuplexService = new DuplexCheckersServiceClient(new System.ServiceModel.InstanceContext(ServiceCallBackHandler));
             SoapService = new SoapCheckersServiceClient();
             GeneratedMoves = new Stack<Move>();
@@ -49,15 +49,15 @@ namespace ComputerPlayer
 
         private void LoginComputerPlayer()
         {
-            DuplexService.Login(COMPUTER_PLAYER_USERNAME, COMPUTER_PLAYER_PASSWORD);
+            DuplexService.LoginAsync(COMPUTER_PLAYER_USERNAME, COMPUTER_PLAYER_PASSWORD);
         }
 
         public void StartGameWithComputerPlayer(Game game)
         {
             game.Player2 = ComputerPlayerDTO;
             ComputerGameDTO = game;
-            DuplexService.StartGame(game, false);
-            DuplexService.SaveInitialPositions(GenerateInitialPositions(), LocalCheckersService.Status.GAME_STARTED);
+            DuplexService.StartGameAsync(game, false);
+            DuplexService.SaveInitialPositionsAsync(GenerateInitialPositions(), LocalCheckersService.Status.GAME_STARTED);
         }
 
         public LocalCheckersService.Move[] GenerateInitialPositions()
@@ -95,7 +95,7 @@ namespace ComputerPlayer
         {
             LastMove = GeneratedMoves.Pop();
             Debug.WriteLine("Sending generated move. {0}", LastMove);
-            DuplexService.MakeMove(LastMove);
+            DuplexService.MakeMoveAsync(LastMove);
         }
 
         public void GenerateMoves()
@@ -181,17 +181,17 @@ namespace ComputerPlayer
 
     public class ComputerPlayerCheckerServiceHandler : LocalCheckersService.IDuplexCheckersServiceCallback
     {
-        public ComputerPlayer ComputerPlayer { get; set; }
+        public ComputerPlayerImpl PlayerImpl { get; set; }
         
         public void GameEnd(LocalCheckersService.Move lastRivalMove, LocalCheckersService.Status status)
         {
-            ComputerPlayer.GameIsRunning = false;
+            PlayerImpl.GameIsRunning = false;
             Debug.WriteLine("Game Was ended. My Status: {0}", status.ToString());
         }
 
         public void LoginCallback(LocalCheckersService.Player player, LocalCheckersService.Game[] playerGames, LocalCheckersService.Status status)
         {
-            ComputerPlayer.ComputerPlayerDTO = player;
+            PlayerImpl.ComputerPlayerDTO = player;
             Debug.WriteLine("Computer player : {0} logedIn. status: {1}", (Player)player, status.ToString());
         }
 
@@ -202,12 +202,12 @@ namespace ComputerPlayer
                 LocalCheckersService.Status.GAME_WIN != status)
             {
                 Debug.WriteLine("Move wasn't accepted. Sending new one.");
-                ComputerPlayer.SendAdditionalMove();
+                PlayerImpl.SendAdditionalMove();
 
             } if (LocalCheckersService.Status.MOVE_ACCEPTED == status)
             {
-                ComputerPlayer.CheckersLocations[ComputerPlayer.LastMove.To.X, ComputerPlayer.LastMove.To.Y] = ComputerPlayer.COMPUTER_PLAYER;
-                ComputerPlayer.CheckersLocations[ComputerPlayer.LastMove.From.X, ComputerPlayer.LastMove.From.Y] = 0;
+                PlayerImpl.CheckersLocations[PlayerImpl.LastMove.To.X, PlayerImpl.LastMove.To.Y] = ComputerPlayerImpl.COMPUTER_PLAYER;
+                PlayerImpl.CheckersLocations[PlayerImpl.LastMove.From.X, PlayerImpl.LastMove.From.Y] = 0;
             }
             Debug.WriteLine("ComputerMove status: " + status.ToString());
         }
@@ -215,14 +215,14 @@ namespace ComputerPlayer
         public void PlayerTurnCallback(LocalCheckersService.Move lastRivalMove)
         {
             Debug.WriteLine("Computer Player got turn. Last rival move: {0}", (Move)lastRivalMove);
-            ComputerPlayer.CheckersLocations[lastRivalMove.To.X, lastRivalMove.To.Y] = ComputerPlayer.REAL_PLAYER;
-            ComputerPlayer.CheckersLocations[lastRivalMove.From.X, lastRivalMove.From.Y] = 0;
-            ComputerPlayer.MakeMove();
+            PlayerImpl.CheckersLocations[lastRivalMove.To.X, lastRivalMove.To.Y] = ComputerPlayerImpl.REAL_PLAYER;
+            PlayerImpl.CheckersLocations[lastRivalMove.From.X, lastRivalMove.From.Y] = 0;
+            PlayerImpl.MakeMove();
         }
 
         public void StartGameCallback(LocalCheckersService.Game game, LocalCheckersService.Status status)
         {
-            ComputerPlayer.GameIsRunning = true;
+            PlayerImpl.GameIsRunning = true;
             Debug.WriteLine("Game: {0}. status: {1}", (Game)game, status.ToString());
         }
     }
