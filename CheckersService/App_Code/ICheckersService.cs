@@ -101,6 +101,9 @@ public interface ISoapCheckersService
 
     [OperationContract]
     List<Game> GetGamesByPlayer(Player player);
+
+    [OperationContract]
+    List<Move> RecoverGameMovesByGameId(int gameId);
 }
 
 

@@ -36,9 +36,6 @@ namespace ComputerPlayer
 
         public ComputerPlayerImpl()
         {
-            // Initial checkers locations
-            CheckersLocations[1,0] = COMPUTER_PLAYER; CheckersLocations[0,1] = COMPUTER_PLAYER; CheckersLocations[1,2] = COMPUTER_PLAYER; CheckersLocations[0,3] = COMPUTER_PLAYER; // Computer checkers
-            CheckersLocations[7,0] = REAL_PLAYER; CheckersLocations[6,1] = REAL_PLAYER; CheckersLocations[7,2] = REAL_PLAYER; CheckersLocations[6,3] = REAL_PLAYER; // Computer checkers
             ServiceCallBackHandler = new ComputerPlayerCheckerServiceHandler();
             ServiceCallBackHandler.PlayerImpl = this;
             DuplexService = new DuplexCheckersServiceClient(new System.ServiceModel.InstanceContext(ServiceCallBackHandler));
@@ -56,17 +53,23 @@ namespace ComputerPlayer
         {
             game.Player2 = ComputerPlayerDTO;
             ComputerGameDTO = game;
-            DuplexService.StartGameAsync(game, false);
-            DuplexService.SaveInitialPositionsAsync(GenerateInitialPositions(), LocalCheckersService.Status.GAME_STARTED);
+            DuplexService.StartGame(game, false);
+            DuplexService.SaveInitialPositions(GenerateInitialPositions(), LocalCheckersService.Status.GAME_STARTED);
         }
 
         public LocalCheckersService.Move[] GenerateInitialPositions()
         {
+            CheckersLocations[1,0] = COMPUTER_PLAYER; CheckersLocations[0,1] = COMPUTER_PLAYER;
+            CheckersLocations[1,2] = COMPUTER_PLAYER; CheckersLocations[0,3] = COMPUTER_PLAYER; // Computer checkers
+            CheckersLocations[7,0] = REAL_PLAYER; CheckersLocations[6,1] = REAL_PLAYER;
+            CheckersLocations[7,2] = REAL_PLAYER; CheckersLocations[6,3] = REAL_PLAYER; // Computer checkers
+
             List<LocalCheckersService.Move> initialMoves = new List<LocalCheckersService.Move>();
             for (int i = 0; i < TOTAL_CHEKERS/2; i++)
             {
                 Coordinate to1 = new Coordinate { X = 0, Y = i};
                 Coordinate to2 = new Coordinate { X = i, Y = i};
+
                 initialMoves.Add(new Move {
                     From = INITIAL_POINT,
                     To = to1,
@@ -156,8 +159,6 @@ namespace ComputerPlayer
         private void GenerateMoreMoves()
         {
             GeneratedMoves.Clear();
-
-            List<LocalCheckersService.Move> allMoves = SoapService.RecoverGameMovesByPlayer(ComputerGameDTO, ComputerPlayerDTO).ToList();
             GenerateMoves();
         }
         private bool MoveIsValid(Player player, Game game, Move move)
@@ -204,7 +205,8 @@ namespace ComputerPlayer
                 Debug.WriteLine("Move wasn't accepted. Sending new one.");
                 PlayerImpl.SendAdditionalMove();
 
-            } if (LocalCheckersService.Status.MOVE_ACCEPTED == status)
+            }
+            if (LocalCheckersService.Status.MOVE_ACCEPTED == status)
             {
                 PlayerImpl.CheckersLocations[PlayerImpl.LastMove.To.X, PlayerImpl.LastMove.To.Y] = ComputerPlayerImpl.COMPUTER_PLAYER;
                 PlayerImpl.CheckersLocations[PlayerImpl.LastMove.From.X, PlayerImpl.LastMove.From.Y] = 0;
@@ -217,6 +219,15 @@ namespace ComputerPlayer
             Debug.WriteLine("Computer Player got turn. Last rival move: {0}", (Move)lastRivalMove);
             PlayerImpl.CheckersLocations[lastRivalMove.To.X, lastRivalMove.To.Y] = ComputerPlayerImpl.REAL_PLAYER;
             PlayerImpl.CheckersLocations[lastRivalMove.From.X, lastRivalMove.From.Y] = 0;
+            if (Math.Abs(lastRivalMove.To.X - lastRivalMove.From.X) > 1)
+            {
+                int deltaColl = (lastRivalMove.To.Y > lastRivalMove.From.Y) ? 1 : -1; // Get coordinate of assumed rival
+
+                Coordinate point = new Coordinate { X = lastRivalMove.From.X + 1, Y = lastRivalMove.From.Y + deltaColl };
+
+                PlayerImpl.CheckersLocations[point.X, point.Y] = 0;
+
+            }
             PlayerImpl.MakeMove();
         }
 

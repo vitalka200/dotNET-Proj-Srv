@@ -245,38 +245,32 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         {
             CheckersDBDataContext db = new CheckersDBDataContext();
             // The only thing that we can update in game it's player binding
+            bool needToSave = false;
             var gamesMetaInfo = db.TblPlayerGames.Where(pg => pg.idGame == game.Id);
             var gameFromDb = db.TblGames.Where(g => g.Id == game.Id).First();
 
             if (!gameFromDb.Status.Equals(game.GameStatus))// Changed game status
             {
                 gameFromDb.Status = game.GameStatus.ToString();
+                needToSave = true;
             }
 
-            if (gamesMetaInfo.Count() == 0)
-            {
-                // We need to create connection between player and game
-
-            }
             if (gamesMetaInfo.Count() > 1)
             {
                 TblPlayerGame gameMetaInfo0 = gamesMetaInfo.ElementAt(0);
                 TblPlayerGame gameMetaInfo1 = gamesMetaInfo.ElementAt(1);
                 gameMetaInfo0.idPlayer = game.Player1.Id;
                 gameMetaInfo1.idPlayer = game.Player2.Id;
-
-                //db.TblPlayerGames.InsertOnSubmit(gameMetaInfo0);
-                //db.TblPlayerGames.InsertOnSubmit(gameMetaInfo1);
-                db.SubmitChanges();
+                needToSave = true;
             }
             if (gamesMetaInfo.Count() > 0)
             {
                 TblPlayerGame gameMetaInfo0 = gamesMetaInfo.ElementAt(0);
                 gameMetaInfo0.idPlayer = game.Player1.Id;
                 TblPlayerGame gameMetaInfo1 = new TblPlayerGame { idGame = game.Id, idPlayer = game.Player2.Id };
-                //db.TblPlayerGames.InsertOnSubmit(gameMetaInfo1);
-                db.SubmitChanges();
+                needToSave = true;
             }
+            if (needToSave) { db.SubmitChanges(); }
 
         }
         catch (Exception) { /* If we have any exception we just return false*/}
@@ -477,8 +471,17 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         if (lookupPlayer2Callback.TryGetValue(player.Id, out storedCallback)) { status = StoreMove(move, player);  }
         else { status = Status.NOT_LOGGED_IN; }
 
-        if (Status.GAME_WIN == status || Status.GAME_LOSE == status) { sessionCallback.GameEnd(move, status); }
-        else { sessionCallback.MakeMoveCallback(status); }
+        if (Status.GAME_WIN == status || Status.GAME_LOSE == status)
+        {
+            sessionCallback.GameEnd(move, status);
+            Game game = GetGameById(move.GameId.ToString());
+            game.GameStatus = Status.GAME_COMPLETED;
+            UpdateGame(game);
+        }
+        else
+        {
+            sessionCallback.MakeMoveCallback(status);
+        }
 
     }
 
@@ -671,6 +674,11 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             orderby m.Id ascending
             select m;
         return thisPlayerMoves.ToList();
+    }
+
+    public List<Move> RecoverGameMovesByGameId(int gameId)
+    {
+        return GetMovesByGame(gameId.ToString());
     }
 
     public void StartGame(Game game, bool computerRival)
