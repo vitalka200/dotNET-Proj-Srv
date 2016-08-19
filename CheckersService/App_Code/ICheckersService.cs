@@ -14,7 +14,7 @@ public interface IRestCheckersService
     /******  REST calls ******/
     // Players REST calls
     [OperationContract]
-    [WebGet(UriTemplate = "/players/login", ResponseFormat = WebMessageFormat.Json)]
+    [WebGet(UriTemplate = "/players/login?user={name}&password={password}", ResponseFormat = WebMessageFormat.Json)]
     Status LoginWeb(string name, string password);
 
     [OperationContract]
