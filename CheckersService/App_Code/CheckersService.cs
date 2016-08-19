@@ -847,11 +847,11 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         return GetGamesByPlayerId(player.Id.ToString());
     }
 
-    public Status LoginWeb(string name, string password)
+    public Player LoginWeb(string name, string password)
     {
         Player player;
         List<Game> gameList = new List<Game>();
         Status status = validatePlayer(name, password, out player);
-        return status;
+        return player;
     }
 }

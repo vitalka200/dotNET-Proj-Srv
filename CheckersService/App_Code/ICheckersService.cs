@@ -15,7 +15,7 @@ public interface IRestCheckersService
     // Players REST calls
     [OperationContract]
     [WebGet(UriTemplate = "/players/login?user={name}&password={password}", ResponseFormat = WebMessageFormat.Json)]
-    Status LoginWeb(string name, string password);
+    Player LoginWeb(string name, string password);
 
     [OperationContract]
     [WebInvoke(Method = "PUT", UriTemplate = "/players/add", ResponseFormat = WebMessageFormat.Json)]
