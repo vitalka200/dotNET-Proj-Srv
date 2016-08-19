@@ -14,6 +14,10 @@ public interface IRestCheckersService
     /******  REST calls ******/
     // Players REST calls
     [OperationContract]
+    [WebGet(UriTemplate = "/players/login", ResponseFormat = WebMessageFormat.Json)]
+    Status LoginWeb(string name, string password);
+
+    [OperationContract]
     [WebInvoke(Method = "PUT", UriTemplate = "/players/add", ResponseFormat = WebMessageFormat.Json)]
     bool AddPlayer(Player player);
 
@@ -141,7 +145,7 @@ public interface IDuplexCheckersServiceCallback
     void PlayerTurnCallback(Move lastRivalMove);
 
     [OperationContract(IsOneWay = true)]
-    void GameEnd(Move lastRivalMove, Status status);
+    void GameEnd(Game game, Move lastRivalMove, Status status);
 }
 
 // Use a data contract as illustrated in the sample below to add composite types to service operations.
@@ -423,7 +427,7 @@ public class Coordinate
 
     public override string ToString()
     {
-        return string.Format("(X = {0,3}, Y = {1,3})", X, Y);
+        return string.Format("(X = {0}, Y = {1})", X, Y);
     }
 
     public static implicit operator Coordinate(LocalCheckersService.Coordinate v)

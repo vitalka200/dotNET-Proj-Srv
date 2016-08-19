@@ -14,8 +14,8 @@ namespace ComputerPlayer
     public class ComputerPlayerImpl
     {
 
-        private const int MAX_COLLS = 4;
-        private const int MAX_ROWS = 8;
+        public const int MAX_COLLS = 4;
+        public const int MAX_ROWS = 8;
         private const int TOTAL_CHEKERS = 4;
         private LocalCheckersService.Coordinate INITIAL_POINT = new LocalCheckersService.Coordinate { X = -1, Y = -1 };
         public int[,] CheckersLocations = new int[MAX_ROWS,MAX_COLLS];
@@ -122,14 +122,14 @@ namespace ComputerPlayer
                             };
                             if (MoveIsValid(ComputerPlayerDTO, ComputerGameDTO, move)) { GeneratedMoves.Push(move); };
                         }
-                        if (PointInBounds(x,y-1) && CheckersLocations[x,y-1] == REAL_PLAYER) // We'll eat player checker
+                        if (PointInBounds(x+1,y-1) && CheckersLocations[x+1,y-1] == REAL_PLAYER) // We'll eat player checker
                         {
                             move = new Move {
                                 GameId = ComputerGameDTO.Id,
                                 PlayerId = ComputerPlayerDTO.Id,
                                 DateTime = DateTime.Now,
                                 From = new Coordinate { X =x, Y =y},
-                                To = new Coordinate { X = x+1, Y = y+1}
+                                To = new Coordinate { X = x+2, Y = y-2}
                             };
                             if (MoveIsValid(ComputerPlayerDTO, ComputerGameDTO, move)) { GeneratedMoves.Push(move); };
                         }
@@ -141,6 +141,17 @@ namespace ComputerPlayer
                                 DateTime = DateTime.Now,
                                 From = new Coordinate { X = x, Y = y},
                                 To = new Coordinate { X = x+1, Y = y+1}
+                            };
+                            if (MoveIsValid(ComputerPlayerDTO, ComputerGameDTO, move)) { GeneratedMoves.Push(move); };
+                        }
+                        if (PointInBounds(x+1,y-1) && CheckersLocations[x+1,y-1] == 0)
+                        {
+                            move = new Move {
+                                GameId = ComputerGameDTO.Id,
+                                PlayerId = ComputerPlayerDTO.Id,
+                                DateTime = DateTime.Now,
+                                From = new Coordinate { X = x, Y = y},
+                                To = new Coordinate { X = x+1, Y = y-1}
                             };
                             if (MoveIsValid(ComputerPlayerDTO, ComputerGameDTO, move)) { GeneratedMoves.Push(move); };
                         }
@@ -174,6 +185,7 @@ namespace ComputerPlayer
             if (delta.X > 0 && game.Player1.Equals(player)) return false; // we white and going back. that not allowed
 
             if (delta.X > 2 || delta.Y > 2) return false; // Too long jump
+            if (CheckersLocations[move.To.X, move.To.Y] != 0) return false; // can't jump to not empty cell
             return true;
         }
 
@@ -184,7 +196,7 @@ namespace ComputerPlayer
     {
         public ComputerPlayerImpl PlayerImpl { get; set; }
         
-        public void GameEnd(LocalCheckersService.Move lastRivalMove, LocalCheckersService.Status status)
+        public void GameEnd(LocalCheckersService.Game game, LocalCheckersService.Move lastRivalMove, LocalCheckersService.Status status)
         {
             PlayerImpl.GameIsRunning = false;
             Debug.WriteLine("Game Was ended. My Status: {0}", status.ToString());
@@ -198,18 +210,17 @@ namespace ComputerPlayer
 
         public void MakeMoveCallback(LocalCheckersService.Status status)
         {
-            while (LocalCheckersService.Status.MOVE_ACCEPTED != status && 
-                LocalCheckersService.Status.GAME_LOSE != status && 
-                LocalCheckersService.Status.GAME_WIN != status)
-            {
-                Debug.WriteLine("Move wasn't accepted. Sending new one.");
-                PlayerImpl.SendAdditionalMove();
-
-            }
             if (LocalCheckersService.Status.MOVE_ACCEPTED == status)
             {
                 PlayerImpl.CheckersLocations[PlayerImpl.LastMove.To.X, PlayerImpl.LastMove.To.Y] = ComputerPlayerImpl.COMPUTER_PLAYER;
                 PlayerImpl.CheckersLocations[PlayerImpl.LastMove.From.X, PlayerImpl.LastMove.From.Y] = 0;
+                if (Math.Abs(PlayerImpl.LastMove.From.X - PlayerImpl.LastMove.To.X) > 1) { GetEatenCoordinateAndUpdate(PlayerImpl.LastMove); }
+                PlayerImpl.LastMove = null;
+            }
+            else //if (LocalCheckersService.Status.GAME_WIN == status || LocalCheckersService.Status.GAME_LOSE == status)
+            {
+                Debug.WriteLine("Move wasn't accepted. Sending new one.");
+                PlayerImpl.SendAdditionalMove();
             }
             Debug.WriteLine("ComputerMove status: " + status.ToString());
         }
@@ -219,16 +230,23 @@ namespace ComputerPlayer
             Debug.WriteLine("Computer Player got turn. Last rival move: {0}", (Move)lastRivalMove);
             PlayerImpl.CheckersLocations[lastRivalMove.To.X, lastRivalMove.To.Y] = ComputerPlayerImpl.REAL_PLAYER;
             PlayerImpl.CheckersLocations[lastRivalMove.From.X, lastRivalMove.From.Y] = 0;
-            if (Math.Abs(lastRivalMove.To.X - lastRivalMove.From.X) > 1)
-            {
-                int deltaColl = (lastRivalMove.To.Y > lastRivalMove.From.Y) ? 1 : -1; // Get coordinate of assumed rival
-
-                Coordinate point = new Coordinate { X = lastRivalMove.From.X + 1, Y = lastRivalMove.From.Y + deltaColl };
-
-                PlayerImpl.CheckersLocations[point.X, point.Y] = 0;
-
-            }
+            if (Math.Abs(lastRivalMove.To.X - lastRivalMove.From.X) > 1) { GetEatenCoordinateAndUpdate(lastRivalMove); }
             PlayerImpl.MakeMove();
+        }
+
+        private Coordinate GetEatenCoordinateAndUpdate(Move move)
+        {
+            int deltaColl = (move.To.Y > move.From.Y) ? 1 : -1; // Get coordinate of assumed rival
+            int newX = move.From.X + deltaColl;
+            int newY = move.From.Y + deltaColl;
+            Coordinate point = new Coordinate {
+                X = newX > 0 && newX < ComputerPlayerImpl.MAX_ROWS ? newX : move.To.X - deltaColl,
+                Y = newY > 0 && newY < ComputerPlayerImpl.MAX_COLLS ? newY : move.From.Y - deltaColl
+            };
+            PlayerImpl.CheckersLocations[point.X, point.Y] = 0;
+            Debug.WriteLine("Received Move for calculation 'eaten' {0}", move);
+            Debug.WriteLine("Eaten Coordinate {0}", point);
+            return point;
         }
 
         public void StartGameCallback(LocalCheckersService.Game game, LocalCheckersService.Status status)

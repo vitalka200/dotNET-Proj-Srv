@@ -356,6 +356,12 @@
   <wsdl:message name="ISoapCheckersService_GetGamesByPlayer_OutputMessage">
     <wsdl:part name="parameters" element="tns:GetGamesByPlayerResponse" />
   </wsdl:message>
+  <wsdl:message name="ISoapCheckersService_RecoverGameMovesByGameId_InputMessage">
+    <wsdl:part name="parameters" element="tns:RecoverGameMovesByGameId" />
+  </wsdl:message>
+  <wsdl:message name="ISoapCheckersService_RecoverGameMovesByGameId_OutputMessage">
+    <wsdl:part name="parameters" element="tns:RecoverGameMovesByGameIdResponse" />
+  </wsdl:message>
   <wsdl:message name="IRestCheckersService_AddPlayer_InputMessage">
     <wsdl:part name="parameters" element="tns:AddPlayer" />
   </wsdl:message>
@@ -507,6 +513,10 @@
     <wsdl:operation name="GetGamesByPlayer">
       <wsdl:input wsaw:Action="http://tempuri.org/ISoapCheckersService/GetGamesByPlayer" message="tns:ISoapCheckersService_GetGamesByPlayer_InputMessage" />
       <wsdl:output wsaw:Action="http://tempuri.org/ISoapCheckersService/GetGamesByPlayerResponse" message="tns:ISoapCheckersService_GetGamesByPlayer_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="RecoverGameMovesByGameId">
+      <wsdl:input wsaw:Action="http://tempuri.org/ISoapCheckersService/RecoverGameMovesByGameId" message="tns:ISoapCheckersService_RecoverGameMovesByGameId_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/ISoapCheckersService/RecoverGameMovesByGameIdResponse" message="tns:ISoapCheckersService_RecoverGameMovesByGameId_OutputMessage" />
     </wsdl:operation>
   </wsdl:portType>
   <wsdl:portType name="IRestCheckersService">
@@ -674,6 +684,15 @@
         <soap:body use="literal" />
       </wsdl:output>
     </wsdl:operation>
+    <wsdl:operation name="RecoverGameMovesByGameId">
+      <soap:operation soapAction="http://tempuri.org/ISoapCheckersService/RecoverGameMovesByGameId" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
   </wsdl:binding>
   <wsdl:service name="CheckersService">
     <wsdl:port name="DUAL" binding="tns:DUAL">
@@ -681,7 +700,7 @@
       <wsa10:EndpointReference>
         <wsa10:Address>http://localhost:52958/Service.svc/client</wsa10:Address>
         <Identity xmlns="http://schemas.xmlsoap.org/ws/2006/02/addressingidentity">
-          <Upn>vitalik@cellebrite.local</Upn>
+          <Upn>DEVELOP-PC\vitalka200</Upn>
         </Identity>
       </wsa10:EndpointReference>
     </wsdl:port>

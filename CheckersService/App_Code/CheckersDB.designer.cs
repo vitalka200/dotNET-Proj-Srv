@@ -699,7 +699,7 @@ public partial class TblGame : INotifyPropertyChanging, INotifyPropertyChanged
 		}
 	}
 	
-	[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CreatedDate", DbType="Date NOT NULL")]
+	[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CreatedDate", DbType="DateTime NOT NULL")]
 	public System.DateTime CreatedDate
 	{
 		get
@@ -1129,7 +1129,7 @@ public partial class TblMove : INotifyPropertyChanging, INotifyPropertyChanged
 		}
 	}
 	
-	[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CreatedDate", DbType="Date NOT NULL")]
+	[global::System.Data.Linq.Mapping.ColumnAttribute(Storage="_CreatedDate", DbType="DateTime NOT NULL")]
 	public System.DateTime CreatedDate
 	{
 		get

@@ -2,102 +2,102 @@
 <ordesignerObjectsDiagram dslVersion="1.0.0.0" absoluteBounds="0, 0, 11, 9.5" name="CheckersDB">
   <DataContextMoniker Name="/CheckersDBDataContext" />
   <nestedChildShapes>
-    <classShape Id="db028456-7b7f-4a4a-b0ca-e50b8c49683b" absoluteBounds="0.75, 1, 2, 1.1939925130208335">
+    <classShape Id="d1cfa2fc-c04a-4eff-b2c4-6c8cccdf72b3" absoluteBounds="0.75, 1, 2, 1.1939925130208335">
       <DataClassMoniker Name="/CheckersDBDataContext/TblFamily" />
       <nestedChildShapes>
-        <elementListCompartment Id="978dd79d-599a-43c7-b799-c0b177aadd25" absoluteBounds="0.765, 1.46, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="67dd9e4f-873a-43ad-b284-dc30c162edf8" absoluteBounds="0.765, 1.46, 1.9700000000000002, 0.63399251302083326" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <classShape Id="2f9f8439-f043-4222-980c-77e67aaf5e8d" absoluteBounds="3.5, 3.875, 2, 1.3862939453125005">
+    <classShape Id="1daaffd8-3926-4d2b-9968-f3bb7dbb05a4" absoluteBounds="3.5, 3.875, 2, 1.3862939453125005">
       <DataClassMoniker Name="/CheckersDBDataContext/TblPlayerGame" />
       <nestedChildShapes>
-        <elementListCompartment Id="03f81e0d-6b6b-4872-93af-ea22d1e0ef44" absoluteBounds="3.515, 4.335, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="eceb97c1-d0ca-4552-bc8d-b67a189bc840" absoluteBounds="3.515, 4.335, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <classShape Id="6d91204a-cec8-4034-b608-6c83037d67c6" absoluteBounds="3.5, 0.875, 2, 1.3862939453125003">
+    <classShape Id="4b1047da-b99a-451a-9ebe-c0c4b7586dcd" absoluteBounds="3.5, 0.875, 2, 1.3862939453125003">
       <DataClassMoniker Name="/CheckersDBDataContext/TblFamilyPlayer" />
       <nestedChildShapes>
-        <elementListCompartment Id="4c68d881-de49-4e3e-8668-df896dd4d16f" absoluteBounds="3.515, 1.335, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="ca8719cd-d133-4a84-9eb9-c6089f7cb349" absoluteBounds="3.515, 1.335, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <classShape Id="68995df5-a4d5-48dd-80b3-2acbfbdfbcfc" absoluteBounds="0.75, 6.75, 2, 1.5785953776041657">
+    <classShape Id="6c8695aa-ea0b-4d70-b4a5-99e8bce3feaf" absoluteBounds="0.75, 6.75, 2, 1.5785953776041657">
       <DataClassMoniker Name="/CheckersDBDataContext/TblGame" />
       <nestedChildShapes>
-        <elementListCompartment Id="83d302eb-05c0-4f1e-b537-e20ecb84eb72" absoluteBounds="0.765, 7.21, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="e836db05-30a5-4113-ab6b-8aaec6c89237" absoluteBounds="0.765, 7.21, 1.9700000000000002, 1.0185953776041665" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <classShape Id="8b847e8e-9b82-4acf-80f0-b00022ca08f6" absoluteBounds="6.25, 6.875, 2, 1.3862939453125005">
+    <classShape Id="ce7098b4-058a-4cbc-a43e-cfb9745ee8fb" absoluteBounds="6.25, 6.875, 2, 1.3862939453125005">
       <DataClassMoniker Name="/CheckersDBDataContext/TblGameMove" />
       <nestedChildShapes>
-        <elementListCompartment Id="8a20419d-0a05-4197-a39a-feec168d0a6f" absoluteBounds="6.265, 7.335, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="b2f0438b-c096-409f-ac1f-e3af322d3911" absoluteBounds="6.265, 7.335, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <classShape Id="35451bc4-2af7-40ce-bca4-8c215ddab1a6" absoluteBounds="3.5, 6.25, 2, 2.5401025390625005">
+    <classShape Id="40dbf3a2-1726-4e72-a2e6-2852851f05bc" absoluteBounds="3.5, 6.25, 2, 2.5401025390625005">
       <DataClassMoniker Name="/CheckersDBDataContext/TblMove" />
       <nestedChildShapes>
-        <elementListCompartment Id="f40c274a-f2b2-4ff6-af82-ac9406d3d490" absoluteBounds="3.515, 6.71, 1.9700000000000002, 1.9801025390625" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="13187f30-375a-4bf5-bd23-9e1b8766c55b" absoluteBounds="3.515, 6.71, 1.9700000000000002, 1.9801025390625" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
-    <classShape Id="b1c18fc4-c723-4f5f-887d-71867486495f" absoluteBounds="0.75, 3.875, 2, 1.3862939453125005">
+    <classShape Id="6fba99a5-6f94-41c2-818d-45a6e4c6b86b" absoluteBounds="0.75, 3.875, 2, 1.3862939453125005">
       <DataClassMoniker Name="/CheckersDBDataContext/TblPlayer" />
       <nestedChildShapes>
-        <elementListCompartment Id="1d20e3e3-1a8e-4561-a92d-d8ffeefe5a63" absoluteBounds="0.765, 4.335, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
+        <elementListCompartment Id="0ff6a407-e495-433e-aa68-5ed1ed24c8c9" absoluteBounds="0.765, 4.335, 1.9700000000000002, 0.8262939453125" name="DataPropertiesCompartment" titleTextColor="Black" itemTextColor="Black" />
       </nestedChildShapes>
     </classShape>
     <associationConnector edgePoints="[(2.75 : 1.59699625651042); (3.04166666666667 : 1.59699625651042 : JumpStart); (3.20833333333333 : 1.59699625651042 : JumpEnd); (3.5 : 1.59699625651042)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/CheckersDBDataContext/TblFamily/TblFamily_TblFamilyPlayer" />
       <nodes>
-        <classShapeMoniker Id="db028456-7b7f-4a4a-b0ca-e50b8c49683b" />
-        <classShapeMoniker Id="6d91204a-cec8-4034-b608-6c83037d67c6" />
+        <classShapeMoniker Id="d1cfa2fc-c04a-4eff-b2c4-6c8cccdf72b3" />
+        <classShapeMoniker Id="4b1047da-b99a-451a-9ebe-c0c4b7586dcd" />
       </nodes>
     </associationConnector>
     <associationConnector edgePoints="[(2.75 : 6.75121330413662); (3.125 : 6.37621330413662); (3.125 : 4.56814697265625); (3.5 : 4.56814697265625)]" fixedFrom="NotFixed" fixedTo="Algorithm">
       <AssociationMoniker Name="/CheckersDBDataContext/TblGame/TblGame_TblPlayerGame" />
       <nodes>
-        <classShapeMoniker Id="68995df5-a4d5-48dd-80b3-2acbfbdfbcfc" />
-        <classShapeMoniker Id="2f9f8439-f043-4222-980c-77e67aaf5e8d" />
+        <classShapeMoniker Id="6c8695aa-ea0b-4d70-b4a5-99e8bce3feaf" />
+        <classShapeMoniker Id="1daaffd8-3926-4d2b-9968-f3bb7dbb05a4" />
       </nodes>
     </associationConnector>
     <associationConnector edgePoints="[(1.75 : 8.32859537760417); (1.75 : 9.0401025390625); (5.875 : 9.0401025390625); (5.875 : 7.56814697265625); (6.25 : 7.56814697265625)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/CheckersDBDataContext/TblGame/TblGame_TblGameMove" />
       <nodes>
-        <classShapeMoniker Id="68995df5-a4d5-48dd-80b3-2acbfbdfbcfc" />
-        <classShapeMoniker Id="8b847e8e-9b82-4acf-80f0-b00022ca08f6" />
+        <classShapeMoniker Id="6c8695aa-ea0b-4d70-b4a5-99e8bce3feaf" />
+        <classShapeMoniker Id="ce7098b4-058a-4cbc-a43e-cfb9745ee8fb" />
       </nodes>
     </associationConnector>
     <associationConnector edgePoints="[(5.5 : 7.15907348632813); (6.25 : 7.15907348632813)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/CheckersDBDataContext/TblMove/TblMove_TblGameMove" />
       <nodes>
-        <classShapeMoniker Id="35451bc4-2af7-40ce-bca4-8c215ddab1a6" />
-        <classShapeMoniker Id="8b847e8e-9b82-4acf-80f0-b00022ca08f6" />
+        <classShapeMoniker Id="40dbf3a2-1726-4e72-a2e6-2852851f05bc" />
+        <classShapeMoniker Id="ce7098b4-058a-4cbc-a43e-cfb9745ee8fb" />
       </nodes>
     </associationConnector>
     <associationConnector edgePoints="[(2.75 : 7.57115684087039); (3.5 : 7.57115684087039)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/CheckersDBDataContext/TblGame/TblGame_TblMove" />
       <nodes>
-        <classShapeMoniker Id="68995df5-a4d5-48dd-80b3-2acbfbdfbcfc" />
-        <classShapeMoniker Id="35451bc4-2af7-40ce-bca4-8c215ddab1a6" />
+        <classShapeMoniker Id="6c8695aa-ea0b-4d70-b4a5-99e8bce3feaf" />
+        <classShapeMoniker Id="40dbf3a2-1726-4e72-a2e6-2852851f05bc" />
       </nodes>
     </associationConnector>
     <associationConnector edgePoints="[(2.75 : 4.15907348632813); (3.5 : 4.15907348632813)]" fixedFrom="Algorithm" fixedTo="Algorithm">
       <AssociationMoniker Name="/CheckersDBDataContext/TblPlayer/TblPlayer_TblPlayerGame" />
       <nodes>
-        <classShapeMoniker Id="b1c18fc4-c723-4f5f-887d-71867486495f" />
-        <classShapeMoniker Id="2f9f8439-f043-4222-980c-77e67aaf5e8d" />
+        <classShapeMoniker Id="6fba99a5-6f94-41c2-818d-45a6e4c6b86b" />
+        <classShapeMoniker Id="1daaffd8-3926-4d2b-9968-f3bb7dbb05a4" />
       </nodes>
     </associationConnector>
     <associationConnector edgePoints="[(2.75 : 3.875); (3.125 : 3.5); (3.125 : 1.20474612825521); (3.5 : 1.20474612825521)]" fixedFrom="NotFixed" fixedTo="Algorithm">
       <AssociationMoniker Name="/CheckersDBDataContext/TblPlayer/TblPlayer_TblFamilyPlayer" />
       <nodes>
-        <classShapeMoniker Id="b1c18fc4-c723-4f5f-887d-71867486495f" />
-        <classShapeMoniker Id="6d91204a-cec8-4034-b608-6c83037d67c6" />
+        <classShapeMoniker Id="6fba99a5-6f94-41c2-818d-45a6e4c6b86b" />
+        <classShapeMoniker Id="4b1047da-b99a-451a-9ebe-c0c4b7586dcd" />
       </nodes>
     </associationConnector>
     <associationConnector edgePoints="[(2.75 : 5.1994429077524); (3.06607443490112 : 5.51551734265353 : JumpStart); (3.18392556509888 : 5.63336847285128 : JumpEnd); (3.3125 : 5.7619429077524); (3.3125 : 6.8793264204352); (3.5 : 6.8793264204352)]" fixedFrom="NotFixed" fixedTo="Algorithm">
       <AssociationMoniker Name="/CheckersDBDataContext/TblPlayer/TblPlayer_TblMove" />
       <nodes>
-        <classShapeMoniker Id="b1c18fc4-c723-4f5f-887d-71867486495f" />
-        <classShapeMoniker Id="35451bc4-2af7-40ce-bca4-8c215ddab1a6" />
+        <classShapeMoniker Id="6fba99a5-6f94-41c2-818d-45a6e4c6b86b" />
+        <classShapeMoniker Id="40dbf3a2-1726-4e72-a2e6-2852851f05bc" />
       </nodes>
     </associationConnector>
   </nestedChildShapes>

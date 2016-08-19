@@ -14,7 +14,7 @@ CREATE TABLE [dbo].[TblFamily] (
 GO
 CREATE TABLE [dbo].[TblGame] (
     [Id]          INT  IDENTITY (1, 1) NOT NULL PRIMARY KEY,
-    [CreatedDate] DATE NOT NULL,
+    [CreatedDate] DATETIME NOT NULL,
 	[Status]      VARCHAR (255) DEFAULT ('NEW_GAME') NOT NULL,
 	[WinnerPlayerNum] INT DEFAULT(0) CHECK (WinnerPlayerNum > -1 AND WinnerPlayerNum <3) NOT NULL
 );
@@ -22,7 +22,7 @@ CREATE TABLE [dbo].[TblGame] (
 go
 CREATE TABLE [dbo].[TblMove] (
     [Id]          INT  IDENTITY (1, 1) NOT NULL  PRIMARY KEY,
-    [CreatedDate] DATE NOT NULL,
+    [CreatedDate] DATETIME NOT NULL,
 	[idPlayer]    INT  NOT NULL,
 	[idGame]    INT  NOT NULL,
     [From_X]      INT  NOT NULL,
@@ -54,13 +54,4 @@ CREATE TABLE [dbo].[TblPlayerGame] (
     [idGame]   INT NOT NULL,
     CONSTRAINT [FK_PlGa_ToGa] FOREIGN KEY ([idGame]) REFERENCES [dbo].[TblGame] ([Id]) ON DELETE CASCADE,
     CONSTRAINT [FK_PlGa_ToPl] FOREIGN KEY ([idPlayer]) REFERENCES [dbo].[TblPlayer] ([Id])
-);
-
-go
-CREATE TABLE [dbo].[TblGameMove] (
-    [Id]       INT IDENTITY (1, 1) NOT NULL  PRIMARY KEY,
-    [idMove] INT NOT NULL,
-    [idGame]   INT NOT NULL,
-    CONSTRAINT [FK_GaMo_ToGa] FOREIGN KEY ([idGame]) REFERENCES [dbo].[TblGame] ([Id]) ON DELETE CASCADE,
-    CONSTRAINT [FK_GaMo_ToMo] FOREIGN KEY ([idMove]) REFERENCES [dbo].[TblMove] ([Id])
 );
