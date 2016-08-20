@@ -301,7 +301,8 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
             var playerFromDb = db.TblPlayers.SingleOrDefault(p => p.Id == player.Id);
 
             playerFromDb.Name = player.Name;
-
+            if (player.Password != null && !playerFromDb.Password.Equals(playerFromDb.Password)) playerFromDb.Password = player.Password;
+            db.SubmitChanges();
             var familiesToPlayerFromDb = db.TblFamilyPlayers.Where(pf => pf.idPlayer == player.Id);
 
             if (familiesToPlayerFromDb.Count() == 0)
