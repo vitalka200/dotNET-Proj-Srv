@@ -99,9 +99,9 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
                 newTblPlayer = db.TblPlayers.Where(p=>p.Name == player.Name && p.Password == player.Password).First();
 
-                if (player.Family != null && player.Family.Id > 0)
+                if (player.Family != null && !string.IsNullOrEmpty(player.Family.Name))
                 {
-                    TblFamily familyFromDB = db.TblFamilies.SingleOrDefault(f => f.Id == player.Family.Id);
+                    TblFamily familyFromDB = db.TblFamilies.SingleOrDefault(f => f.Name == player.Family.Name);
                     if (familyFromDB == null) // We didn't found family with this Id
                     { return false; }
 
@@ -111,11 +111,16 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                     {
                         db.TblFamilyPlayers.DeleteOnSubmit(x);
                     }
-                    TblFamilyPlayer familyToPLayerBinding = new TblFamilyPlayer { idPlayer = player.Id, idFamily = player.Family.Id };
+                    TblFamilyPlayer familyToPLayerBinding = new TblFamilyPlayer { idPlayer = newTblPlayer.Id, idFamily = familyFromDB.Id };
                     db.TblFamilyPlayers.InsertOnSubmit(familyToPLayerBinding);
                     db.SubmitChanges();
-                    return true;
                 }
+                else
+                {
+                    db.TblFamilyPlayers.InsertOnSubmit(new TblFamilyPlayer { idFamily = 1, idPlayer = newTblPlayer.Id });
+                    db.SubmitChanges();
+                }
+                return true;
             }
         }
         catch (Exception e)
@@ -392,7 +397,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
                 CheckersDBDataContext db = new CheckersDBDataContext();
                 var familyFromDb = db.TblFamilies.SingleOrDefault(f => f.Name == family.Name);
                 //we already have this family
-                if (familyFromDb != null) { return false; }
+                if (familyFromDb != null) { return true; }
                 else
                 {
                     db.TblFamilies.InsertOnSubmit(new TblFamily { Name = family.Name });
