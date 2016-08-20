@@ -32,7 +32,7 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
     public bool AddGame(Game game)
     {
-        if (game != null && game.Player1 != null && game.Player2 != null)
+        if (game != null)
         {
             CreateNewGame(game);
             return true;
@@ -51,13 +51,18 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
 
         try
         {
-            TblPlayerGame[] gameToPlayer = {
-                new TblPlayerGame { idGame = gameToSave.Id, idPlayer = game.Player1.Id },
-                new TblPlayerGame { idGame = gameToSave.Id, idPlayer = game.Player2.Id }
-            };
+            if (game.Player1 != null && db.TblPlayerGames.Where(pg => pg.idGame == gameToSave.Id && pg.idPlayer == game.Player1.Id).Count() < 1)
+            {
+                db.TblPlayerGames.InsertOnSubmit(new TblPlayerGame { idGame = gameToSave.Id, idPlayer = game.Player1.Id });
+                db.SubmitChanges();
+            }
 
-            db.TblPlayerGames.InsertAllOnSubmit(gameToPlayer);
-            db.SubmitChanges();
+            if (game.Player2 != null && db.TblPlayerGames.Where(pg => pg.idGame == gameToSave.Id && pg.idPlayer == game.Player2.Id).Count() < 1)
+            {
+                db.TblPlayerGames.InsertOnSubmit(new TblPlayerGame { idGame = gameToSave.Id, idPlayer = game.Player2.Id });
+                db.SubmitChanges();
+            }
+
         } catch (Exception e)
         {
             Debug.WriteLine("CreateNewGame(). Something went wrong..." + e.Message);
