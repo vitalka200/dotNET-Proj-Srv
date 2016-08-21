@@ -512,8 +512,6 @@ public class CheckersService : IRestCheckersService, IDuplexCheckersService, ISo
         {
             Game game = GetGameById(move.GameId.ToString());
             sessionCallback.GameEnd(game, move, status);
-            game.GameStatus = Status.GAME_COMPLETED;
-            UpdateGame(game);
         }
         else
         {
